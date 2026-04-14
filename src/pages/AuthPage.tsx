@@ -135,24 +135,6 @@ export default function AuthPage() {
               />
             </div>
 
-            {!isLogin && (
-              <div className="space-y-2">
-                <Label>Perfil</Label>
-                <div className="grid grid-cols-3 gap-2">
-                  {(['separador', 'conferente', 'fiscal'] as Perfil[]).map((p) => (
-                    <Button
-                      key={p}
-                      type="button"
-                      variant={selectedPerfil === p ? 'default' : 'outline'}
-                      className="h-12 text-sm font-semibold capitalize"
-                      onClick={() => setSelectedPerfil(p)}
-                    >
-                      {p}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            )}
 
             <Button type="submit" className="w-full h-14 text-lg font-semibold" disabled={loading}>
               {loading ? 'Aguarde...' : isLogin ? 'Entrar' : 'Criar Conta'}
@@ -162,7 +144,7 @@ export default function AuthPage() {
             <button
               type="button"
               className="text-sm text-primary hover:underline"
-              onClick={() => { setIsLogin(!isLogin); setSelectedPerfil(''); setEmail(''); }}
+              onClick={() => { setIsLogin(!isLogin); setEmail(''); }}
             >
               {isLogin ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Faça login'}
             </button>
