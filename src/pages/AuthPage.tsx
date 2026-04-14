@@ -15,6 +15,7 @@ export default function AuthPage() {
   const { user, perfil } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [nome, setNome] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [selectedPerfil, setSelectedPerfil] = useState<Perfil | ''>('');
   const [loading, setLoading] = useState(false);
@@ -35,6 +36,7 @@ export default function AuthPage() {
     setLoading(true);
     try {
       if (isLogin) {
+        // Tentar buscar pelo nome no profiles
         const { data: profile } = await supabase
           .from('profiles')
           .select('email_gerado')
@@ -60,9 +62,11 @@ export default function AuthPage() {
           return;
         }
 
-        const emailGerado = gerarEmail(nome);
+        // Usar e-mail informado ou gerar um automático
+        const emailFinal = email.trim() || gerarEmail(nome);
+
         const { data, error } = await supabase.auth.signUp({
-          email: emailGerado,
+          email: emailFinal,
           password,
           options: { data: { nome: nome.trim() } },
         });
@@ -72,7 +76,7 @@ export default function AuthPage() {
           await supabase.from('profiles').insert({
             id: data.user.id,
             nome: nome.trim(),
-            email_gerado: emailGerado,
+            email_gerado: emailFinal,
           });
 
           await supabase.from('user_roles').insert({
@@ -115,6 +119,20 @@ export default function AuthPage() {
                 required
               />
             </div>
+
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label>E-mail <span className="text-muted-foreground text-xs">(opcional)</span></Label>
+                <Input
+                  type="email"
+                  className="h-12 text-base"
+                  placeholder="seu@email.com"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                />
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label>Senha</Label>
               <Input
@@ -155,7 +173,7 @@ export default function AuthPage() {
             <button
               type="button"
               className="text-sm text-primary hover:underline"
-              onClick={() => { setIsLogin(!isLogin); setSelectedPerfil(''); }}
+              onClick={() => { setIsLogin(!isLogin); setSelectedPerfil(''); setEmail(''); }}
             >
               {isLogin ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Faça login'}
             </button>
