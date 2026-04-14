@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import logoNitro from '@/assets/logo-nitro.jpg';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
-import type { Perfil } from '@/types/conferencia';
+
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -17,7 +17,7 @@ export default function AuthPage() {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [selectedPerfil, setSelectedPerfil] = useState<Perfil | ''>('');
+  
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -56,12 +56,6 @@ export default function AuthPage() {
         if (error) throw error;
         toast.success('Login realizado com sucesso!');
       } else {
-        if (!selectedPerfil) {
-          toast.error('Selecione um perfil.');
-          setLoading(false);
-          return;
-        }
-
         // Usar e-mail informado ou gerar um automático
         const emailFinal = email.trim() || gerarEmail(nome);
 
@@ -78,14 +72,9 @@ export default function AuthPage() {
             nome: nome.trim(),
             email_gerado: emailFinal,
           });
-
-          await supabase.from('user_roles').insert({
-            user_id: data.user.id,
-            role: selectedPerfil,
-          });
         }
 
-        toast.success('Conta criada com sucesso!');
+        toast.success('Conta criada! Aguarde o administrador atribuir seu perfil.');
       }
     } catch (err: any) {
       toast.error(err.message || 'Erro na autenticação.');
@@ -146,24 +135,6 @@ export default function AuthPage() {
               />
             </div>
 
-            {!isLogin && (
-              <div className="space-y-2">
-                <Label>Perfil</Label>
-                <div className="grid grid-cols-3 gap-2">
-                  {(['separador', 'conferente', 'fiscal'] as Perfil[]).map((p) => (
-                    <Button
-                      key={p}
-                      type="button"
-                      variant={selectedPerfil === p ? 'default' : 'outline'}
-                      className="h-12 text-sm font-semibold capitalize"
-                      onClick={() => setSelectedPerfil(p)}
-                    >
-                      {p}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            )}
 
             <Button type="submit" className="w-full h-14 text-lg font-semibold" disabled={loading}>
               {loading ? 'Aguarde...' : isLogin ? 'Entrar' : 'Criar Conta'}
@@ -173,7 +144,7 @@ export default function AuthPage() {
             <button
               type="button"
               className="text-sm text-primary hover:underline"
-              onClick={() => { setIsLogin(!isLogin); setSelectedPerfil(''); setEmail(''); }}
+              onClick={() => { setIsLogin(!isLogin); setEmail(''); }}
             >
               {isLogin ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Faça login'}
             </button>
