@@ -6,7 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { Perfil } from '@/types/conferencia';
-import { PackageCheck } from 'lucide-react';
+import { PackageCheck, LogOut } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 const separadores = ['Diego', 'Rodolfo', 'Manoel'];
 const conferentes = ['Leonardo Bricio', 'Fabricio Gabriel', 'Hugo'];
