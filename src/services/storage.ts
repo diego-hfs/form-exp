@@ -147,6 +147,28 @@ export async function getConferenciasPorUsuario(nome: string, role: 'separador' 
   ));
 }
 
+export async function getEmbarquesParaFiscal(): Promise<Conferencia[]> {
+  const { data: rows } = await supabase
+    .from('conferencias')
+    .select('*')
+    .in('status', ['conferido', 'divergente', 'aprovado', 'bloqueado'])
+    .order('created_at', { ascending: false });
+
+  if (!rows || rows.length === 0) return [];
+
+  const ids = rows.map(r => r.id);
+  const [{ data: itensSep }, { data: itensConf }] = await Promise.all([
+    supabase.from('itens_separacao').select('*').in('conferencia_id', ids),
+    supabase.from('itens_conferencia').select('*').in('conferencia_id', ids),
+  ]);
+
+  return rows.map(r => mapConferencia(
+    r,
+    (itensSep || []).filter(i => i.conferencia_id === r.id),
+    (itensConf || []).filter(i => i.conferencia_id === r.id),
+  ));
+}
+
 export async function saveDecisaoFiscal(
   conferenciaId: string,
   fiscal: string,
