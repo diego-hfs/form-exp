@@ -5,9 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { saveConferencia } from '@/services/storage';
-import type { Conferencia, ItemSeparacao } from '@/types/conferencia';
+import { saveConferenciaSeparacao } from '@/services/storage';
+import type { ItemSeparacao } from '@/types/conferencia';
 import { ArrowLeft, Plus, Send, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -24,6 +23,7 @@ export default function SeparadorPage() {
   const nome = sessionStorage.getItem('nome') || '';
   const [embarque, setEmbarque] = useState('');
   const [itens, setItens] = useState<Partial<ItemSeparacao>[]>([emptyItem()]);
+  const [loading, setLoading] = useState(false);
 
   const updateItem = (idx: number, field: string, value: string | number) => {
     setItens(prev => prev.map((item, i) => i === idx ? { ...item, [field]: value } : item));
@@ -43,31 +43,36 @@ export default function SeparadorPage() {
     );
   };
 
-  const handleFinalizar = () => {
+  const handleFinalizar = async () => {
     if (!isFormValid()) {
       toast.error('Preencha todos os campos obrigatórios.');
       return;
     }
 
-    const conferencia: Conferencia = {
-      id: crypto.randomUUID(),
-      numeroEmbarque: embarque.trim(),
-      separador: nome,
-      status: 'aguardando_conferencia',
-      itensSeparacao: itens.map(item => ({
-        ...item,
-        id: crypto.randomUUID(),
-        quantidadePallets: Number(item.quantidadePallets),
-        quantidade: Number(item.quantidade),
-      })) as ItemSeparacao[],
-      itensConferencia: [],
-      dataSeparacao: new Date().toISOString(),
-    };
-
-    saveConferencia(conferencia);
-    toast.success('Separação finalizada com sucesso!');
-    setEmbarque('');
-    setItens([emptyItem()]);
+    setLoading(true);
+    try {
+      await saveConferenciaSeparacao(
+        embarque.trim(),
+        nome,
+        itens.map(item => ({
+          codigoProduto: item.codigoProduto || '',
+          descricaoProduto: item.descricaoProduto || '',
+          lote: item.lote || '',
+          dataFabricacao: item.dataFabricacao || '',
+          dataValidade: item.dataValidade || '',
+          tipoEmbalagem: item.tipoEmbalagem || '',
+          quantidadePallets: Number(item.quantidadePallets),
+          quantidade: Number(item.quantidade),
+        }))
+      );
+      toast.success('Separação finalizada com sucesso!');
+      setEmbarque('');
+      setItens([emptyItem()]);
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao salvar separação.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -149,8 +154,8 @@ export default function SeparadorPage() {
             </div>
           ))}
 
-          <Button className="w-full h-14 text-lg font-semibold" onClick={handleFinalizar} disabled={!isFormValid()}>
-            <Send className="w-5 h-5 mr-2" /> Finalizar Separação
+          <Button className="w-full h-14 text-lg font-semibold" onClick={handleFinalizar} disabled={!isFormValid() || loading}>
+            <Send className="w-5 h-5 mr-2" /> {loading ? 'Salvando...' : 'Finalizar Separação'}
           </Button>
         </CardContent>
       </Card>
