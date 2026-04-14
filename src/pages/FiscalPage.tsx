@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { getConferenciaPorEmbarque, saveDecisaoFiscal } from '@/services/storage';
 import type { Conferencia } from '@/types/conferencia';
 import { ArrowLeft, Search, ShieldCheck, ShieldX, AlertTriangle } from 'lucide-react';
+import PageHeader from '@/components/PageHeader';
 import { toast } from 'sonner';
 
 export default function FiscalPage() {
@@ -59,7 +60,7 @@ export default function FiscalPage() {
 
   return (
     <div className="min-h-screen bg-background p-4 max-w-6xl mx-auto">
-      <div className="flex items-center gap-3 mb-6">
+      <PageHeader>
         <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
           <ArrowLeft className="w-5 h-5" />
         </Button>
@@ -67,7 +68,7 @@ export default function FiscalPage() {
           <h1 className="text-2xl font-bold">Validação Fiscal</h1>
           <p className="text-muted-foreground text-sm">Fiscal: {nome}</p>
         </div>
-      </div>
+      </PageHeader>
 
       <Card className="mb-4">
         <CardContent className="pt-6 flex gap-3">

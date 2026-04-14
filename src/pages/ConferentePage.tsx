@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { getConferenciaPorEmbarque, saveConferenciaConferente } from '@/services/storage';
 import type { Conferencia, ItemConferencia } from '@/types/conferencia';
 import { ArrowLeft, Search, CheckCircle, XCircle } from 'lucide-react';
+import PageHeader from '@/components/PageHeader';
 import { toast } from 'sonner';
 
 const embalagensOptions = ['Caixa', 'Pallet', 'Saco', 'Tambor', 'Big Bag', 'Fardo', 'Engradado'];
@@ -126,7 +127,7 @@ export default function ConferentePage() {
 
   return (
     <div className="min-h-screen bg-background p-4 max-w-5xl mx-auto">
-      <div className="flex items-center gap-3 mb-6">
+      <PageHeader>
         <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
           <ArrowLeft className="w-5 h-5" />
         </Button>
@@ -134,7 +135,7 @@ export default function ConferentePage() {
           <h1 className="text-2xl font-bold">Conferência</h1>
           <p className="text-muted-foreground text-sm">Conferente: {nome}</p>
         </div>
-      </div>
+      </PageHeader>
 
       <Card className="mb-4">
         <CardContent className="pt-6 flex gap-3">
