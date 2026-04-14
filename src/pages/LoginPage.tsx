@@ -14,6 +14,7 @@ const conferentes = ['Leonardo Bricio', 'Fabricio Gabriel', 'Hugo'];
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { signOut, user } = useAuth();
   const [perfil, setPerfil] = useState<Perfil | ''>('');
   const [nome, setNome] = useState('');
   const [fiscalNome, setFiscalNome] = useState('');
