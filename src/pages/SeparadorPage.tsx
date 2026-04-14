@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -7,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { saveConferenciaSeparacao } from '@/services/storage';
 import type { ItemSeparacao } from '@/types/conferencia';
-import { ArrowLeft, Plus, Send, Trash2 } from 'lucide-react';
+import { ArrowLeft, ClipboardList, LogOut, Plus, Send, Trash2 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { toast } from 'sonner';
 
@@ -21,6 +22,7 @@ const emptyItem = (): Partial<ItemSeparacao> => ({
 
 export default function SeparadorPage() {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const nome = sessionStorage.getItem('nome') || '';
   const [embarque, setEmbarque] = useState('');
   const [itens, setItens] = useState<Partial<ItemSeparacao>[]>([emptyItem()]);
@@ -82,9 +84,17 @@ export default function SeparadorPage() {
         <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl font-bold">Separação</h1>
           <p className="text-muted-foreground text-sm">Separador: {nome}</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => navigate('/meus-embarques')}>
+            <ClipboardList className="w-4 h-4 mr-1" /> Meus Embarques
+          </Button>
+          <Button variant="ghost" size="sm" onClick={signOut} className="text-destructive">
+            <LogOut className="w-4 h-4 mr-1" /> Sair
+          </Button>
         </div>
       </PageHeader>
 
