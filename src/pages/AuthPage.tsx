@@ -1,22 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { PackageCheck } from 'lucide-react';
 import logoNitro from '@/assets/logo-nitro.jpg';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
-import { useEffect } from 'react';
 
 export default function AuthPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [nome, setNome] = useState('');
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -24,25 +21,56 @@ export default function AuthPage() {
     if (user) navigate('/', { replace: true });
   }, [user, navigate]);
 
+  const gerarEmail = (nome: string) => {
+    const slug = nome.trim().toLowerCase().replace(/\s+/g, '.').replace(/[^a-z0-9.]/g, '');
+    return `${slug}.${Date.now()}@interno.app`;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || !password.trim()) return;
-    if (!isLogin && !nome.trim()) return;
+    if (!nome.trim() || !password.trim()) return;
 
     setLoading(true);
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+        // Buscar email pelo nome no profiles
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('email_gerado')
+          .ilike('nome', nome.trim())
+          .maybeSingle();
+
+        if (!profile) {
+          toast.error('Usuário não encontrado. Verifique o nome.');
+          setLoading(false);
+          return;
+        }
+
+        const { error } = await supabase.auth.signInWithPassword({
+          email: profile.email_gerado,
+          password,
+        });
         if (error) throw error;
         toast.success('Login realizado com sucesso!');
         navigate('/');
       } else {
-        const { error } = await supabase.auth.signUp({
-          email: email.trim(),
+        const emailGerado = gerarEmail(nome);
+        const { data, error } = await supabase.auth.signUp({
+          email: emailGerado,
           password,
           options: { data: { nome: nome.trim() } },
         });
         if (error) throw error;
+
+        // Salvar perfil com nome e email gerado
+        if (data.user) {
+          await supabase.from('profiles').insert({
+            id: data.user.id,
+            nome: nome.trim(),
+            email_gerado: emailGerado,
+          });
+        }
+
         toast.success('Conta criada com sucesso!');
         navigate('/');
       }
@@ -67,27 +95,14 @@ export default function AuthPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
-              <div className="space-y-2">
-                <Label>Nome completo</Label>
-                <Input
-                  type="text"
-                  className="h-12 text-base"
-                  placeholder="Seu nome"
-                  value={nome}
-                  onChange={e => setNome(e.target.value)}
-                  required={!isLogin}
-                />
-              </div>
-            )}
             <div className="space-y-2">
-              <Label>Email</Label>
+              <Label>{isLogin ? 'Nome de usuário' : 'Nome completo'}</Label>
               <Input
-                type="email"
+                type="text"
                 className="h-12 text-base"
-                placeholder="seu@email.com"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
+                placeholder={isLogin ? 'Digite seu nome' : 'Seu nome completo'}
+                value={nome}
+                onChange={e => setNome(e.target.value)}
                 required
               />
             </div>

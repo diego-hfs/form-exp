@@ -169,6 +169,27 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email_gerado: string
+          id: string
+          nome: string
+        }
+        Insert: {
+          created_at?: string | null
+          email_gerado: string
+          id: string
+          nome: string
+        }
+        Update: {
+          created_at?: string | null
+          email_gerado?: string
+          id?: string
+          nome?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
