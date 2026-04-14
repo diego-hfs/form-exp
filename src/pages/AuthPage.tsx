@@ -74,7 +74,13 @@ export default function AuthPage() {
           });
         }
 
+        // Deslogar após cadastro para voltar à tela de login
+        await supabase.auth.signOut();
         toast.success('Conta criada! Aguarde o administrador atribuir seu perfil.');
+        setIsLogin(true);
+        setNome('');
+        setEmail('');
+        setPassword('');
       }
     } catch (err: any) {
       toast.error(err.message || 'Erro na autenticação.');
