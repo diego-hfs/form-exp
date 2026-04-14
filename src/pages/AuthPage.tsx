@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PackageCheck } from 'lucide-react';
+import logoNitro from '@/assets/logo-nitro.jpg';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect } from 'react';
