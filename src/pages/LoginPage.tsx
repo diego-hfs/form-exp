@@ -35,11 +35,17 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center space-y-2">
+          <div className="flex justify-end">
+            <Button variant="ghost" size="sm" onClick={signOut} className="text-muted-foreground">
+              <LogOut className="w-4 h-4 mr-1" /> Sair
+            </Button>
+          </div>
           <div className="mx-auto w-16 h-16 rounded-2xl bg-primary flex items-center justify-center">
             <PackageCheck className="w-8 h-8 text-primary-foreground" />
           </div>
           <CardTitle className="text-2xl font-bold">Conferência de Expedição</CardTitle>
           <p className="text-muted-foreground text-sm">Selecione seu perfil para continuar</p>
+          {user && <p className="text-muted-foreground text-xs">{user.email}</p>}
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="grid grid-cols-3 gap-2">
