@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import logoNitro from '@/assets/logo-nitro.jpg';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
-import type { Perfil } from '@/types/conferencia';
+
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -17,7 +17,7 @@ export default function AuthPage() {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [selectedPerfil, setSelectedPerfil] = useState<Perfil | ''>('');
+  
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
