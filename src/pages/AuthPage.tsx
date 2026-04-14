@@ -15,6 +15,7 @@ export default function AuthPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
+  const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,6 +27,7 @@ export default function AuthPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !password.trim()) return;
+    if (!isLogin && !nome.trim()) return;
 
     setLoading(true);
     try {
@@ -35,7 +37,11 @@ export default function AuthPage() {
         toast.success('Login realizado com sucesso!');
         navigate('/');
       } else {
-        const { error } = await supabase.auth.signUp({ email: email.trim(), password });
+        const { error } = await supabase.auth.signUp({
+          email: email.trim(),
+          password,
+          options: { data: { nome: nome.trim() } },
+        });
         if (error) throw error;
         toast.success('Conta criada com sucesso!');
         navigate('/');
@@ -61,6 +67,19 @@ export default function AuthPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label>Nome completo</Label>
+                <Input
+                  type="text"
+                  className="h-12 text-base"
+                  placeholder="Seu nome"
+                  value={nome}
+                  onChange={e => setNome(e.target.value)}
+                  required={!isLogin}
+                />
+              </div>
+            )}
             <div className="space-y-2">
               <Label>Email</Label>
               <Input
