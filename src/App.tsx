@@ -24,9 +24,9 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/" element={<ProtectedRoute><LoginPage /></ProtectedRoute>} />
-            <Route path="/separador" element={<ProtectedRoute><SeparadorPage /></ProtectedRoute>} />
-            <Route path="/conferente" element={<ProtectedRoute><ConferentePage /></ProtectedRoute>} />
-            <Route path="/fiscal" element={<ProtectedRoute><FiscalPage /></ProtectedRoute>} />
+            <Route path="/separador" element={<ProtectedRoute allowedRole="separador"><SeparadorPage /></ProtectedRoute>} />
+            <Route path="/conferente" element={<ProtectedRoute allowedRole="conferente"><ConferentePage /></ProtectedRoute>} />
+            <Route path="/fiscal" element={<ProtectedRoute allowedRole="fiscal"><FiscalPage /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

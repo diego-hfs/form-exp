@@ -8,18 +8,20 @@ import { Label } from '@/components/ui/label';
 import logoNitro from '@/assets/logo-nitro.jpg';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
+import type { Perfil } from '@/types/conferencia';
 
 export default function AuthPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, perfil } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [nome, setNome] = useState('');
   const [password, setPassword] = useState('');
+  const [selectedPerfil, setSelectedPerfil] = useState<Perfil | ''>('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user) navigate('/', { replace: true });
-  }, [user, navigate]);
+    if (user && perfil) navigate(`/${perfil}`, { replace: true });
+  }, [user, perfil, navigate]);
 
   const gerarEmail = (nome: string) => {
     const slug = nome.trim().toLowerCase().replace(/\s+/g, '.').replace(/[^a-z0-9.]/g, '');
@@ -33,7 +35,6 @@ export default function AuthPage() {
     setLoading(true);
     try {
       if (isLogin) {
-        // Buscar email pelo nome no profiles
         const { data: profile } = await supabase
           .from('profiles')
           .select('email_gerado')
@@ -52,8 +53,13 @@ export default function AuthPage() {
         });
         if (error) throw error;
         toast.success('Login realizado com sucesso!');
-        navigate('/');
       } else {
+        if (!selectedPerfil) {
+          toast.error('Selecione um perfil.');
+          setLoading(false);
+          return;
+        }
+
         const emailGerado = gerarEmail(nome);
         const { data, error } = await supabase.auth.signUp({
           email: emailGerado,
@@ -62,17 +68,20 @@ export default function AuthPage() {
         });
         if (error) throw error;
 
-        // Salvar perfil com nome e email gerado
         if (data.user) {
           await supabase.from('profiles').insert({
             id: data.user.id,
             nome: nome.trim(),
             email_gerado: emailGerado,
           });
+
+          await supabase.from('user_roles').insert({
+            user_id: data.user.id,
+            role: selectedPerfil,
+          });
         }
 
         toast.success('Conta criada com sucesso!');
-        navigate('/');
       }
     } catch (err: any) {
       toast.error(err.message || 'Erro na autenticação.');
@@ -118,6 +127,26 @@ export default function AuthPage() {
                 minLength={6}
               />
             </div>
+
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label>Perfil</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {(['separador', 'conferente', 'fiscal'] as Perfil[]).map((p) => (
+                    <Button
+                      key={p}
+                      type="button"
+                      variant={selectedPerfil === p ? 'default' : 'outline'}
+                      className="h-12 text-sm font-semibold capitalize"
+                      onClick={() => setSelectedPerfil(p)}
+                    >
+                      {p}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <Button type="submit" className="w-full h-14 text-lg font-semibold" disabled={loading}>
               {loading ? 'Aguarde...' : isLogin ? 'Entrar' : 'Criar Conta'}
             </Button>
@@ -126,7 +155,7 @@ export default function AuthPage() {
             <button
               type="button"
               className="text-sm text-primary hover:underline"
-              onClick={() => setIsLogin(!isLogin)}
+              onClick={() => { setIsLogin(!isLogin); setSelectedPerfil(''); }}
             >
               {isLogin ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Faça login'}
             </button>
