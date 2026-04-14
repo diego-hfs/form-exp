@@ -14,7 +14,161 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      conferencias: {
+        Row: {
+          conferente: string | null
+          created_at: string
+          data_conferencia: string | null
+          data_fiscal: string | null
+          data_separacao: string
+          decisao_fiscal: string | null
+          fiscal: string | null
+          id: string
+          numero_embarque: string
+          separador: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          conferente?: string | null
+          created_at?: string
+          data_conferencia?: string | null
+          data_fiscal?: string | null
+          data_separacao?: string
+          decisao_fiscal?: string | null
+          fiscal?: string | null
+          id?: string
+          numero_embarque: string
+          separador: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          conferente?: string | null
+          created_at?: string
+          data_conferencia?: string | null
+          data_fiscal?: string | null
+          data_separacao?: string
+          decisao_fiscal?: string | null
+          fiscal?: string | null
+          id?: string
+          numero_embarque?: string
+          separador?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      itens_conferencia: {
+        Row: {
+          codigo_produto: string
+          conferencia_id: string
+          created_at: string
+          data_fabricacao: string
+          data_validade: string
+          id: string
+          item_separacao_id: string
+          lote: string
+          quantidade: number
+          quantidade_pallets: number
+          status: string
+          tipo_embalagem: string
+        }
+        Insert: {
+          codigo_produto: string
+          conferencia_id: string
+          created_at?: string
+          data_fabricacao: string
+          data_validade: string
+          id?: string
+          item_separacao_id: string
+          lote: string
+          quantidade?: number
+          quantidade_pallets?: number
+          status?: string
+          tipo_embalagem: string
+        }
+        Update: {
+          codigo_produto?: string
+          conferencia_id?: string
+          created_at?: string
+          data_fabricacao?: string
+          data_validade?: string
+          id?: string
+          item_separacao_id?: string
+          lote?: string
+          quantidade?: number
+          quantidade_pallets?: number
+          status?: string
+          tipo_embalagem?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "itens_conferencia_conferencia_id_fkey"
+            columns: ["conferencia_id"]
+            isOneToOne: false
+            referencedRelation: "conferencias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "itens_conferencia_item_separacao_id_fkey"
+            columns: ["item_separacao_id"]
+            isOneToOne: false
+            referencedRelation: "itens_separacao"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      itens_separacao: {
+        Row: {
+          codigo_produto: string
+          conferencia_id: string
+          created_at: string
+          data_fabricacao: string
+          data_validade: string
+          descricao_produto: string
+          id: string
+          lote: string
+          quantidade: number
+          quantidade_pallets: number
+          tipo_embalagem: string
+        }
+        Insert: {
+          codigo_produto: string
+          conferencia_id: string
+          created_at?: string
+          data_fabricacao: string
+          data_validade: string
+          descricao_produto: string
+          id?: string
+          lote: string
+          quantidade?: number
+          quantidade_pallets?: number
+          tipo_embalagem: string
+        }
+        Update: {
+          codigo_produto?: string
+          conferencia_id?: string
+          created_at?: string
+          data_fabricacao?: string
+          data_validade?: string
+          descricao_produto?: string
+          id?: string
+          lote?: string
+          quantidade?: number
+          quantidade_pallets?: number
+          tipo_embalagem?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "itens_separacao_conferencia_id_fkey"
+            columns: ["conferencia_id"]
+            isOneToOne: false
+            referencedRelation: "conferencias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
