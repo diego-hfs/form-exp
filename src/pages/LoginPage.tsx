@@ -46,7 +46,11 @@ export default function LoginPage() {
           </div>
           <CardTitle className="text-2xl font-bold">Conferência de Expedição</CardTitle>
           <p className="text-muted-foreground text-sm">Selecione seu perfil para continuar</p>
-          {user && <p className="text-muted-foreground text-xs">{user.email}</p>}
+          {user && (
+            <p className="text-muted-foreground text-xs">
+              Olá, {user.user_metadata?.nome?.split(' ')[0] || 'Usuário'}
+            </p>
+          )}
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="grid grid-cols-3 gap-2">
