@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { getConferenciaPorEmbarque, saveConferencia } from '@/services/storage';
+import { getConferenciaPorEmbarque, saveConferenciaConferente } from '@/services/storage';
 import type { Conferencia, ItemConferencia } from '@/types/conferencia';
 import { ArrowLeft, Search, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -20,27 +20,35 @@ export default function ConferentePage() {
   const [conferencia, setConferencia] = useState<Conferencia | null>(null);
   const [conferencias, setConferencias] = useState<Record<string, Partial<ItemConferencia>>>({});
   const [finalizado, setFinalizado] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const buscar = () => {
-    const found = getConferenciaPorEmbarque(embarque.trim());
-    if (!found) {
-      toast.error('Embarque não encontrado.');
-      return;
+  const buscar = async () => {
+    setLoading(true);
+    try {
+      const found = await getConferenciaPorEmbarque(embarque.trim());
+      if (!found) {
+        toast.error('Embarque não encontrado.');
+        return;
+      }
+      if (found.status !== 'aguardando_conferencia') {
+        toast.error('Este embarque já foi conferido.');
+        return;
+      }
+      setConferencia(found);
+      setFinalizado(false);
+      const initial: Record<string, Partial<ItemConferencia>> = {};
+      found.itensSeparacao.forEach(item => {
+        initial[item.id] = {
+          codigoProduto: '', lote: '', dataFabricacao: '', dataValidade: '',
+          tipoEmbalagem: '', quantidadePallets: 0, quantidade: 0,
+        };
+      });
+      setConferencias(initial);
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao buscar embarque.');
+    } finally {
+      setLoading(false);
     }
-    if (found.status !== 'aguardando_conferencia') {
-      toast.error('Este embarque já foi conferido.');
-      return;
-    }
-    setConferencia(found);
-    setFinalizado(false);
-    const initial: Record<string, Partial<ItemConferencia>> = {};
-    found.itensSeparacao.forEach(item => {
-      initial[item.id] = {
-        codigoProduto: '', lote: '', dataFabricacao: '', dataValidade: '',
-        tipoEmbalagem: '', quantidadePallets: 0, quantidade: 0,
-      };
-    });
-    setConferencias(initial);
   };
 
   const updateConf = (itemId: string, field: string, value: string | number) => {
@@ -74,43 +82,46 @@ export default function ConferentePage() {
     );
   };
 
-  const handleFinalizar = () => {
+  const handleFinalizar = async () => {
     if (!conferencia || !isAllFilled()) {
       toast.error('Preencha todos os campos de conferência.');
       return;
     }
 
-    const itensConf: ItemConferencia[] = conferencia.itensSeparacao.map(sep => {
-      const conf = conferencias[sep.id];
-      const cmp = compareItem(sep.id)!;
-      const allMatch = Object.values(cmp).every(Boolean);
-      return {
-        id: crypto.randomUUID(),
-        itemSeparacaoId: sep.id,
-        codigoProduto: conf.codigoProduto || '',
-        lote: conf.lote || '',
-        dataFabricacao: conf.dataFabricacao || '',
-        dataValidade: conf.dataValidade || '',
-        tipoEmbalagem: conf.tipoEmbalagem || '',
-        quantidadePallets: Number(conf.quantidadePallets),
-        quantidade: Number(conf.quantidade),
-        status: allMatch ? 'conferido' : 'divergente',
-      };
-    });
+    setLoading(true);
+    try {
+      const itensConf: Omit<ItemConferencia, 'id'>[] = conferencia.itensSeparacao.map(sep => {
+        const conf = conferencias[sep.id];
+        const cmp = compareItem(sep.id)!;
+        const allMatch = Object.values(cmp).every(Boolean);
+        return {
+          itemSeparacaoId: sep.id,
+          codigoProduto: conf.codigoProduto || '',
+          lote: conf.lote || '',
+          dataFabricacao: conf.dataFabricacao || '',
+          dataValidade: conf.dataValidade || '',
+          tipoEmbalagem: conf.tipoEmbalagem || '',
+          quantidadePallets: Number(conf.quantidadePallets),
+          quantidade: Number(conf.quantidade),
+          status: allMatch ? 'conferido' as const : 'divergente' as const,
+        };
+      });
 
-    const hasDivergencia = itensConf.some(i => i.status === 'divergente');
-    const updated: Conferencia = {
-      ...conferencia,
-      conferente: nome,
-      itensConferencia: itensConf,
-      status: hasDivergencia ? 'divergente' : 'conferido',
-      dataConferencia: new Date().toISOString(),
-    };
+      const hasDivergencia = itensConf.some(i => i.status === 'divergente');
+      const status = hasDivergencia ? 'divergente' as const : 'conferido' as const;
 
-    saveConferencia(updated);
-    setConferencia(updated);
-    setFinalizado(true);
-    toast.success('Conferência finalizada!');
+      await saveConferenciaConferente(conferencia.id, nome, itensConf, status);
+
+      // Reload to get updated data
+      const updated = await getConferenciaPorEmbarque(conferencia.numeroEmbarque);
+      if (updated) setConferencia(updated);
+      setFinalizado(true);
+      toast.success('Conferência finalizada!');
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao salvar conferência.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -128,7 +139,9 @@ export default function ConferentePage() {
       <Card className="mb-4">
         <CardContent className="pt-6 flex gap-3">
           <Input className="h-12 text-lg flex-1" placeholder="Número de Embarque" value={embarque} onChange={e => setEmbarque(e.target.value)} />
-          <Button className="h-12 px-6" onClick={buscar}><Search className="w-5 h-5 mr-2" /> Buscar</Button>
+          <Button className="h-12 px-6" onClick={buscar} disabled={loading}>
+            <Search className="w-5 h-5 mr-2" /> {loading ? 'Buscando...' : 'Buscar'}
+          </Button>
         </CardContent>
       </Card>
 
@@ -226,8 +239,8 @@ export default function ConferentePage() {
             })}
 
             {!finalizado && (
-              <Button className="w-full h-14 text-lg font-semibold" onClick={handleFinalizar} disabled={!isAllFilled()}>
-                <CheckCircle className="w-5 h-5 mr-2" /> Finalizar Conferência
+              <Button className="w-full h-14 text-lg font-semibold" onClick={handleFinalizar} disabled={!isAllFilled() || loading}>
+                <CheckCircle className="w-5 h-5 mr-2" /> {loading ? 'Salvando...' : 'Finalizar Conferência'}
               </Button>
             )}
           </CardContent>

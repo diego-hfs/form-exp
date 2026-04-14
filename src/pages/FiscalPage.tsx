@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { getConferenciaPorEmbarque, saveConferencia } from '@/services/storage';
+import { getConferenciaPorEmbarque, saveDecisaoFiscal } from '@/services/storage';
 import type { Conferencia } from '@/types/conferencia';
 import { ArrowLeft, Search, ShieldCheck, ShieldX, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -15,36 +15,41 @@ export default function FiscalPage() {
   const nome = sessionStorage.getItem('nome') || '';
   const [embarque, setEmbarque] = useState('');
   const [conferencia, setConferencia] = useState<Conferencia | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const buscar = () => {
-    const found = getConferenciaPorEmbarque(embarque.trim());
-    if (!found) {
-      toast.error('Embarque não encontrado.');
-      return;
-    }
-    if (found.status === 'aguardando_conferencia') {
-      toast.error('Este embarque ainda não foi conferido.');
-      return;
-    }
-    if (found.status === 'aprovado' || found.status === 'bloqueado') {
+  const buscar = async () => {
+    setLoading(true);
+    try {
+      const found = await getConferenciaPorEmbarque(embarque.trim());
+      if (!found) {
+        toast.error('Embarque não encontrado.');
+        return;
+      }
+      if (found.status === 'aguardando_conferencia') {
+        toast.error('Este embarque ainda não foi conferido.');
+        return;
+      }
       setConferencia(found);
-      return;
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao buscar embarque.');
+    } finally {
+      setLoading(false);
     }
-    setConferencia(found);
   };
 
-  const handleDecisao = (decisao: 'aprovado' | 'bloqueado') => {
+  const handleDecisao = async (decisao: 'aprovado' | 'bloqueado') => {
     if (!conferencia) return;
-    const updated: Conferencia = {
-      ...conferencia,
-      fiscal: nome,
-      status: decisao,
-      decisaoFiscal: decisao,
-      dataFiscal: new Date().toISOString(),
-    };
-    saveConferencia(updated);
-    setConferencia(updated);
-    toast.success(decisao === 'aprovado' ? 'Expedição aprovada!' : 'Expedição bloqueada!');
+    setLoading(true);
+    try {
+      await saveDecisaoFiscal(conferencia.id, nome, decisao);
+      const updated = await getConferenciaPorEmbarque(conferencia.numeroEmbarque);
+      if (updated) setConferencia(updated);
+      toast.success(decisao === 'aprovado' ? 'Expedição aprovada!' : 'Expedição bloqueada!');
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao salvar decisão.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const hasDivergencia = conferencia?.itensConferencia.some(i => i.status === 'divergente');
@@ -67,13 +72,14 @@ export default function FiscalPage() {
       <Card className="mb-4">
         <CardContent className="pt-6 flex gap-3">
           <Input className="h-12 text-lg flex-1" placeholder="Número de Embarque" value={embarque} onChange={e => setEmbarque(e.target.value)} />
-          <Button className="h-12 px-6" onClick={buscar}><Search className="w-5 h-5 mr-2" /> Buscar</Button>
+          <Button className="h-12 px-6" onClick={buscar} disabled={loading}>
+            <Search className="w-5 h-5 mr-2" /> {loading ? 'Buscando...' : 'Buscar'}
+          </Button>
         </CardContent>
       </Card>
 
       {conferencia && (
         <>
-          {/* Resumo */}
           <Card className="mb-4">
             <CardContent className="pt-6">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
@@ -106,7 +112,6 @@ export default function FiscalPage() {
             </div>
           )}
 
-          {/* Painel comparativo */}
           <Card className="mb-4">
             <CardHeader>
               <CardTitle className="text-lg">Painel Comparativo</CardTitle>
@@ -168,12 +173,12 @@ export default function FiscalPage() {
             </CardContent>
           </Card>
 
-          {/* Ações do fiscal */}
           {!isFinalizado && (
             <div className="grid grid-cols-2 gap-4">
               <Button
                 className="h-16 text-lg font-semibold bg-success hover:bg-success/90 text-success-foreground"
                 onClick={() => handleDecisao('aprovado')}
+                disabled={loading}
               >
                 <ShieldCheck className="w-6 h-6 mr-2" /> Aprovar Expedição
               </Button>
@@ -181,6 +186,7 @@ export default function FiscalPage() {
                 variant="destructive"
                 className="h-16 text-lg font-semibold"
                 onClick={() => handleDecisao('bloqueado')}
+                disabled={loading}
               >
                 <ShieldX className="w-6 h-6 mr-2" /> Bloquear Expedição
               </Button>
