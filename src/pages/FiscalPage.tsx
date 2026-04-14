@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -7,12 +8,13 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { getConferenciaPorEmbarque, saveDecisaoFiscal } from '@/services/storage';
 import type { Conferencia } from '@/types/conferencia';
-import { ArrowLeft, Search, ShieldCheck, ShieldX, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Search, ShieldCheck, ShieldX, AlertTriangle, LogOut } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { toast } from 'sonner';
 
 export default function FiscalPage() {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const nome = sessionStorage.getItem('nome') || '';
   const [embarque, setEmbarque] = useState('');
   const [conferencia, setConferencia] = useState<Conferencia | null>(null);
@@ -64,10 +66,13 @@ export default function FiscalPage() {
         <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl font-bold">Validação Fiscal</h1>
           <p className="text-muted-foreground text-sm">Fiscal: {nome}</p>
         </div>
+        <Button variant="ghost" size="sm" onClick={signOut} className="text-destructive">
+          <LogOut className="w-4 h-4 mr-1" /> Sair
+        </Button>
       </PageHeader>
 
       <Card className="mb-4">
