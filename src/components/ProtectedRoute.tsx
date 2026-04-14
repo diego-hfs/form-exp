@@ -1,10 +1,16 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import type { Perfil } from '@/types/conferencia';
 
-export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+interface Props {
+  children: React.ReactNode;
+  allowedRole?: Perfil;
+}
 
-  if (loading) {
+export default function ProtectedRoute({ children, allowedRole }: Props) {
+  const { user, loading, perfil, perfilLoading } = useAuth();
+
+  if (loading || perfilLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <p className="text-muted-foreground">Carregando...</p>
@@ -14,6 +20,10 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
   if (!user) {
     return <Navigate to="/auth" replace />;
+  }
+
+  if (allowedRole && perfil !== allowedRole) {
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
