@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Package } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
-import { getConferenciasPorSeparador } from '@/services/storage';
+import { getConferenciasPorUsuario } from '@/services/storage';
 import type { Conferencia } from '@/types/conferencia';
 
 function getEtapa(c: Conferencia) {
@@ -34,15 +34,19 @@ function getEtapaVariant(c: Conferencia): 'default' | 'secondary' | 'destructive
 export default function MeusEmbarquesPage() {
   const navigate = useNavigate();
   const nome = sessionStorage.getItem('nome') || '';
+  const perfil = (sessionStorage.getItem('perfil') || 'separador') as 'separador' | 'conferente' | 'fiscal';
   const [embarques, setEmbarques] = useState<Conferencia[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const backRoute = `/${perfil}`;
+  const perfilLabel = perfil === 'conferente' ? 'Conferente' : perfil === 'fiscal' ? 'Fiscal' : 'Separador';
+
   useEffect(() => {
-    getConferenciasPorSeparador(nome).then(data => {
+    getConferenciasPorUsuario(nome, perfil).then(data => {
       setEmbarques(data);
       setLoading(false);
     });
-  }, [nome]);
+  }, [nome, perfil]);
 
   const formatDate = (d?: string) => {
     if (!d) return '-';
@@ -52,12 +56,12 @@ export default function MeusEmbarquesPage() {
   return (
     <div className="min-h-screen bg-background p-4 max-w-5xl mx-auto">
       <PageHeader>
-        <Button variant="ghost" size="icon" onClick={() => navigate('/separador')}>
+        <Button variant="ghost" size="icon" onClick={() => navigate(backRoute)}>
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div>
           <h1 className="text-2xl font-bold">Meus Embarques</h1>
-          <p className="text-muted-foreground text-sm">Separador: {nome}</p>
+          <p className="text-muted-foreground text-sm">{perfilLabel}: {nome}</p>
         </div>
       </PageHeader>
 
