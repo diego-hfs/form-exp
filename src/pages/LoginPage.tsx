@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { Perfil } from '@/types/conferencia';
 import { PackageCheck, LogOut } from 'lucide-react';
+import logoNitro from '@/assets/logo-nitro.jpg';
 import { useAuth } from '@/hooks/useAuth';
 
 const separadores = ['Diego', 'Rodolfo', 'Manoel'];
@@ -40,8 +41,8 @@ export default function LoginPage() {
               <LogOut className="w-4 h-4 mr-1" /> Sair
             </Button>
           </div>
-          <div className="mx-auto w-16 h-16 rounded-2xl bg-primary flex items-center justify-center">
-            <PackageCheck className="w-8 h-8 text-primary-foreground" />
+          <div className="mx-auto">
+            <img src={logoNitro} alt="Nitro" className="h-16 object-contain mx-auto" />
           </div>
           <CardTitle className="text-2xl font-bold">Conferência de Expedição</CardTitle>
           <p className="text-muted-foreground text-sm">Selecione seu perfil para continuar</p>

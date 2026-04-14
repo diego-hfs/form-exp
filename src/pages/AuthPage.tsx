@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PackageCheck } from 'lucide-react';
+import logoNitro from '@/assets/logo-nitro.jpg';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect } from 'react';
@@ -50,8 +51,8 @@ export default function AuthPage() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center space-y-2">
-          <div className="mx-auto w-16 h-16 rounded-2xl bg-primary flex items-center justify-center">
-            <PackageCheck className="w-8 h-8 text-primary-foreground" />
+          <div className="mx-auto">
+            <img src={logoNitro} alt="Nitro" className="h-16 object-contain mx-auto" />
           </div>
           <CardTitle className="text-2xl font-bold">Conferência de Expedição</CardTitle>
           <p className="text-muted-foreground text-sm">

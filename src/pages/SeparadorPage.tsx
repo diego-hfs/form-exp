@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { saveConferenciaSeparacao } from '@/services/storage';
 import type { ItemSeparacao } from '@/types/conferencia';
 import { ArrowLeft, Plus, Send, Trash2 } from 'lucide-react';
+import PageHeader from '@/components/PageHeader';
 import { toast } from 'sonner';
 
 const embalagensOptions = ['Caixa', 'Pallet', 'Saco', 'Tambor', 'Big Bag', 'Fardo', 'Engradado'];
@@ -77,7 +78,7 @@ export default function SeparadorPage() {
 
   return (
     <div className="min-h-screen bg-background p-4 max-w-5xl mx-auto">
-      <div className="flex items-center gap-3 mb-6">
+      <PageHeader>
         <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
           <ArrowLeft className="w-5 h-5" />
         </Button>
@@ -85,7 +86,7 @@ export default function SeparadorPage() {
           <h1 className="text-2xl font-bold">Separação</h1>
           <p className="text-muted-foreground text-sm">Separador: {nome}</p>
         </div>
-      </div>
+      </PageHeader>
 
       <Card className="mb-4">
         <CardContent className="pt-6">
