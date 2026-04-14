@@ -56,12 +56,6 @@ export default function AuthPage() {
         if (error) throw error;
         toast.success('Login realizado com sucesso!');
       } else {
-        if (!selectedPerfil) {
-          toast.error('Selecione um perfil.');
-          setLoading(false);
-          return;
-        }
-
         // Usar e-mail informado ou gerar um automático
         const emailFinal = email.trim() || gerarEmail(nome);
 
@@ -78,14 +72,9 @@ export default function AuthPage() {
             nome: nome.trim(),
             email_gerado: emailFinal,
           });
-
-          await supabase.from('user_roles').insert({
-            user_id: data.user.id,
-            role: selectedPerfil,
-          });
         }
 
-        toast.success('Conta criada com sucesso!');
+        toast.success('Conta criada! Aguarde o administrador atribuir seu perfil.');
       }
     } catch (err: any) {
       toast.error(err.message || 'Erro na autenticação.');
