@@ -67,6 +67,19 @@ export default function AuthPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label>Nome completo</Label>
+                <Input
+                  type="text"
+                  className="h-12 text-base"
+                  placeholder="Seu nome"
+                  value={nome}
+                  onChange={e => setNome(e.target.value)}
+                  required={!isLogin}
+                />
+              </div>
+            )}
             <div className="space-y-2">
               <Label>Email</Label>
               <Input
