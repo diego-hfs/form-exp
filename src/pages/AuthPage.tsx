@@ -101,7 +101,7 @@ export default function AuthPage() {
           <div className="mx-auto">
             <img src={logoNitro} alt="Nitro" className="h-16 object-contain mx-auto" />
           </div>
-          <CardTitle className="text-2xl font-bold">Conferência de Expedição</CardTitle>
+          <CardTitle className="text-2xl font-bold">Formulário Conferência de Expedição</CardTitle>
           <p className="text-muted-foreground text-sm">
             {isLogin ? 'Faça login para continuar' : 'Crie sua conta'}
           </p>
