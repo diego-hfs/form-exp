@@ -8,6 +8,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import AuthPage from "./pages/AuthPage";
 import LoginPage from "./pages/LoginPage";
 import SeparadorPage from "./pages/SeparadorPage";
+import MeusEmbarquesPage from "./pages/MeusEmbarquesPage";
 import ConferentePage from "./pages/ConferentePage";
 import FiscalPage from "./pages/FiscalPage";
 import NotFound from "./pages/NotFound";
@@ -25,6 +26,7 @@ const App = () => (
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/" element={<ProtectedRoute><LoginPage /></ProtectedRoute>} />
             <Route path="/separador" element={<ProtectedRoute allowedRole="separador"><SeparadorPage /></ProtectedRoute>} />
+            <Route path="/meus-embarques" element={<ProtectedRoute allowedRole="separador"><MeusEmbarquesPage /></ProtectedRoute>} />
             <Route path="/conferente" element={<ProtectedRoute allowedRole="conferente"><ConferentePage /></ProtectedRoute>} />
             <Route path="/fiscal" element={<ProtectedRoute allowedRole="fiscal"><FiscalPage /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
