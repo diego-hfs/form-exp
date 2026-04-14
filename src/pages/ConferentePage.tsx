@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { getConferenciaPorEmbarque, saveConferenciaConferente } from '@/services/storage';
 import type { Conferencia, ItemConferencia } from '@/types/conferencia';
-import { ArrowLeft, Search, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowLeft, Search, CheckCircle, XCircle, LogOut } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { toast } from 'sonner';
 
@@ -16,6 +17,7 @@ const embalagensOptions = ['Caixa', 'Pallet', 'Saco', 'Tambor', 'Big Bag', 'Fard
 
 export default function ConferentePage() {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const nome = sessionStorage.getItem('nome') || '';
   const [embarque, setEmbarque] = useState('');
   const [conferencia, setConferencia] = useState<Conferencia | null>(null);
@@ -131,10 +133,13 @@ export default function ConferentePage() {
         <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl font-bold">Conferência</h1>
           <p className="text-muted-foreground text-sm">Conferente: {nome}</p>
         </div>
+        <Button variant="ghost" size="sm" onClick={signOut} className="text-destructive">
+          <LogOut className="w-4 h-4 mr-1" /> Sair
+        </Button>
       </PageHeader>
 
       <Card className="mb-4">
