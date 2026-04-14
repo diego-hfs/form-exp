@@ -124,11 +124,12 @@ export async function saveConferenciaConferente(
   if (err2) throw new Error(err2.message);
 }
 
-export async function getConferenciasPorSeparador(separador: string): Promise<Conferencia[]> {
+export async function getConferenciasPorUsuario(nome: string, role: 'separador' | 'conferente' | 'fiscal'): Promise<Conferencia[]> {
+  const column = role === 'conferente' ? 'conferente' : role === 'fiscal' ? 'fiscal' : 'separador';
   const { data: rows } = await supabase
     .from('conferencias')
     .select('*')
-    .eq('separador', separador)
+    .eq(column, nome)
     .order('created_at', { ascending: false });
 
   if (!rows || rows.length === 0) return [];

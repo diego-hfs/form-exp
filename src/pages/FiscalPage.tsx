@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { getConferenciaPorEmbarque, saveDecisaoFiscal } from '@/services/storage';
 import type { Conferencia } from '@/types/conferencia';
-import { ArrowLeft, Search, ShieldCheck, ShieldX, AlertTriangle, LogOut } from 'lucide-react';
+import { ArrowLeft, Search, ShieldCheck, ShieldX, AlertTriangle, ClipboardList, LogOut } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { toast } from 'sonner';
 
@@ -70,9 +70,14 @@ export default function FiscalPage() {
           <h1 className="text-2xl font-bold">Validação Fiscal</h1>
           <p className="text-muted-foreground text-sm">Fiscal: {nome}</p>
         </div>
-        <Button variant="ghost" size="sm" onClick={signOut} className="text-destructive">
-          <LogOut className="w-4 h-4 mr-1" /> Sair
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => navigate('/meus-embarques')}>
+            <ClipboardList className="w-4 h-4 mr-1" /> Meus Embarques
+          </Button>
+          <Button variant="ghost" size="sm" onClick={signOut} className="text-destructive">
+            <LogOut className="w-4 h-4 mr-1" /> Sair
+          </Button>
+        </div>
       </PageHeader>
 
       <Card className="mb-4">
