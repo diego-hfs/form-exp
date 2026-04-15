@@ -24,6 +24,11 @@ export default function AuthPage() {
     if (user && perfil) navigate(`/${perfil}`, { replace: true });
   }, [user, perfil, navigate]);
 
+  useEffect(() => {
+    resetTabAuthorization();
+    void supabase.auth.signOut();
+  }, [resetTabAuthorization]);
+
   const gerarEmail = (nome: string) => {
     const slug = nome.trim().toLowerCase().replace(/\s+/g, '.').replace(/[^a-z0-9.]/g, '');
     return `${slug}.${Date.now()}@interno.app`;
@@ -35,6 +40,8 @@ export default function AuthPage() {
 
     setLoading(true);
     try {
+      resetTabAuthorization();
+
       if (isLogin) {
         // Tentar buscar pelo nome no profiles
         const { data: profile } = await supabase
@@ -50,18 +57,17 @@ export default function AuthPage() {
           return;
         }
 
-        authorizeTab();
         const { error } = await supabase.auth.signInWithPassword({
           email: profile.email_gerado,
           password,
         });
         if (error) throw error;
+        await authorizeTab();
         toast.success('Login realizado com sucesso!');
       } else {
         // Usar e-mail informado ou gerar um automático
         const emailFinal = email.trim() || gerarEmail(nome);
 
-        authorizeTab();
         const { data, error } = await supabase.auth.signUp({
           email: emailFinal,
           password,
@@ -73,6 +79,7 @@ export default function AuthPage() {
 
         // Deslogar após cadastro para voltar à tela de login
         await supabase.auth.signOut();
+        resetTabAuthorization();
         toast.success('Conta criada! Aguarde o administrador atribuir seu perfil.');
         setIsLogin(true);
         setNome('');
