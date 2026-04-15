@@ -26,7 +26,6 @@ export default function AuthPage() {
 
   useEffect(() => {
     resetTabAuthorization();
-    void supabase.auth.signOut();
   }, [resetTabAuthorization]);
 
   const gerarEmail = (nome: string) => {
