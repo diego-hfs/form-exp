@@ -22,8 +22,7 @@ const emptyItem = (): Partial<ItemSeparacao> => ({
 
 export default function SeparadorPage() {
   const navigate = useNavigate();
-  const { signOut } = useAuth();
-  const nome = sessionStorage.getItem('nome') || '';
+  const { signOut, nome } = useAuth();
   const [embarque, setEmbarque] = useState('');
   const [itens, setItens] = useState<Partial<ItemSeparacao>[]>([emptyItem()]);
   const [loading, setLoading] = useState(false);
