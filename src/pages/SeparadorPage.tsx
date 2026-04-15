@@ -67,10 +67,13 @@ export default function SeparadorPage() {
           tipoEmbalagem: item.tipoEmbalagem || '',
           quantidadePallets: Number(item.quantidadePallets),
           quantidade: Number(item.quantidade),
-        }))
+        })),
+        placaVeiculo.trim() || undefined
+      );
       );
       toast.success('Separação finalizada com sucesso!');
       setEmbarque('');
+      setPlacaVeiculo('');
       setItens([emptyItem()]);
     } catch (err: any) {
       toast.error(err.message || 'Erro ao salvar separação.');
