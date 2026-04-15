@@ -66,13 +66,7 @@ export default function AuthPage() {
         });
         if (error) throw error;
 
-        if (data.user) {
-          await supabase.from('profiles').insert({
-            id: data.user.id,
-            nome: nome.trim(),
-            email_gerado: emailFinal,
-          });
-        }
+        // Profile is now auto-created by database trigger
 
         // Deslogar após cadastro para voltar à tela de login
         await supabase.auth.signOut();
