@@ -25,6 +25,7 @@ export type Database = {
           fiscal: string | null
           id: string
           numero_embarque: string
+          placa_veiculo: string | null
           separador: string
           status: string
           updated_at: string
@@ -39,6 +40,7 @@ export type Database = {
           fiscal?: string | null
           id?: string
           numero_embarque: string
+          placa_veiculo?: string | null
           separador: string
           status?: string
           updated_at?: string
@@ -53,6 +55,7 @@ export type Database = {
           fiscal?: string | null
           id?: string
           numero_embarque?: string
+          placa_veiculo?: string | null
           separador?: string
           status?: string
           updated_at?: string

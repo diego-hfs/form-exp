@@ -1,0 +1,1 @@
+ALTER TABLE public.conferencias ADD COLUMN placa_veiculo text;
