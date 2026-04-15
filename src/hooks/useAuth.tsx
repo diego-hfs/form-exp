@@ -22,7 +22,7 @@ interface AuthContextType {
   perfil: Perfil | null;
   perfilLoading: boolean;
   nome: string;
-  authorizeTab: () => void;
+  authorizeTab: () => Promise<void>;
   resetTabAuthorization: () => void;
   signOut: () => Promise<void>;
 }
@@ -34,7 +34,7 @@ const AuthContext = createContext<AuthContextType>({
   perfil: null,
   perfilLoading: true,
   nome: '',
-  authorizeTab: () => {},
+  authorizeTab: async () => {},
   resetTabAuthorization: () => {},
   signOut: async () => {},
 });
@@ -58,16 +58,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     sessionStorage.removeItem('nome');
   };
 
-  const authorizeTab = () => {
-    sessionStorage.setItem(TAB_AUTHORIZED_KEY, '1');
-    tabAuthorizedRef.current = true;
-  };
-
-  const resetTabAuthorization = () => {
-    sessionStorage.removeItem(TAB_AUTHORIZED_KEY);
-    tabAuthorizedRef.current = false;
-  };
-
   const fetchRole = async (userId: string) => {
     setPerfilLoading(true);
     const { data } = await supabase
@@ -77,6 +67,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .maybeSingle();
     setPerfil((data?.role as Perfil) ?? null);
     setPerfilLoading(false);
+  };
+
+  const applySessionState = async (nextSession: Session | null) => {
+    setSession(nextSession);
+    setUser(nextSession?.user ?? null);
+    setLoading(false);
+
+    if (nextSession?.user) {
+      await fetchRole(nextSession.user.id);
+      return;
+    }
+
+    setPerfil(null);
+    setPerfilLoading(false);
+  };
+
+  const authorizeTab = async () => {
+    sessionStorage.setItem(TAB_AUTHORIZED_KEY, '1');
+    tabAuthorizedRef.current = true;
+    const { data: { session: activeSession } } = await supabase.auth.getSession();
+    await applySessionState(activeSession);
+  };
+
+  const resetTabAuthorization = () => {
+    sessionStorage.removeItem(TAB_AUTHORIZED_KEY);
+    tabAuthorizedRef.current = false;
   };
 
   useEffect(() => {
@@ -147,14 +163,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data: { session } } = await supabase.auth.getSession();
       if (!isMounted) return;
 
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-      if (session?.user) {
-        fetchRole(session.user.id);
-      } else {
-        setPerfilLoading(false);
-      }
+      await applySessionState(session);
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -171,15 +180,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-      if (session?.user) {
-        fetchRole(session.user.id);
-      } else {
-        setPerfil(null);
-        setPerfilLoading(false);
-      }
+      void applySessionState(session);
     });
 
     init();
