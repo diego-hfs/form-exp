@@ -6,6 +6,7 @@ function mapConferencia(row: any, itensSep: any[], itensConf: any[]): Conferenci
   return {
     id: row.id,
     numeroEmbarque: row.numero_embarque,
+    placaVeiculo: row.placa_veiculo ?? undefined,
     separador: row.separador,
     conferente: row.conferente ?? undefined,
     fiscal: row.fiscal ?? undefined,
@@ -60,13 +61,15 @@ export async function getConferenciaPorEmbarque(numero: string): Promise<Confere
 export async function saveConferenciaSeparacao(
   embarque: string,
   separador: string,
-  itens: Omit<ItemSeparacao, 'id'>[]
+  itens: Omit<ItemSeparacao, 'id'>[],
+  placaVeiculo?: string
 ): Promise<void> {
   const { data: conf, error } = await supabase
     .from('conferencias')
     .insert({
       numero_embarque: embarque,
       separador,
+      placa_veiculo: placaVeiculo || null,
       status: 'aguardando_conferencia',
     })
     .select()

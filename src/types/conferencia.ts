@@ -35,6 +35,7 @@ export interface ItemConferencia {
 export interface Conferencia {
   id: string;
   numeroEmbarque: string;
+  placaVeiculo?: string;
   separador: string;
   conferente?: string;
   fiscal?: string;

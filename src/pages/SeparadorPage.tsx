@@ -25,6 +25,7 @@ export default function SeparadorPage() {
   const navigate = useNavigate();
   const { signOut, nome } = useAuth();
   const [embarque, setEmbarque] = useState('');
+  const [placaVeiculo, setPlacaVeiculo] = useState('');
   const [itens, setItens] = useState<Partial<ItemSeparacao>[]>([emptyItem()]);
   const [loading, setLoading] = useState(false);
 
@@ -66,10 +67,12 @@ export default function SeparadorPage() {
           tipoEmbalagem: item.tipoEmbalagem || '',
           quantidadePallets: Number(item.quantidadePallets),
           quantidade: Number(item.quantidade),
-        }))
+        })),
+        placaVeiculo.trim() || undefined
       );
       toast.success('Separação finalizada com sucesso!');
       setEmbarque('');
+      setPlacaVeiculo('');
       setItens([emptyItem()]);
     } catch (err: any) {
       toast.error(err.message || 'Erro ao salvar separação.');
@@ -99,9 +102,15 @@ export default function SeparadorPage() {
       </PageHeader>
 
       <Card className="mb-4">
-        <CardContent className="pt-6">
-          <Label className="text-base font-semibold">Número de Embarque</Label>
-          <Input className="h-12 text-lg mt-2" placeholder="Ex: EMB-001" value={embarque} onChange={e => setEmbarque(e.target.value)} />
+        <CardContent className="pt-6 space-y-4">
+          <div>
+            <Label className="text-base font-semibold">Número de Embarque</Label>
+            <Input className="h-12 text-lg mt-2" placeholder="Ex: EMB-001" value={embarque} onChange={e => setEmbarque(e.target.value)} />
+          </div>
+          <div>
+            <Label className="text-base font-semibold">Placa do Veículo</Label>
+            <Input className="h-12 text-lg mt-2" placeholder="Ex: ABC-1234" value={placaVeiculo} onChange={e => setPlacaVeiculo(e.target.value.toUpperCase())} />
+          </div>
         </CardContent>
       </Card>
 
