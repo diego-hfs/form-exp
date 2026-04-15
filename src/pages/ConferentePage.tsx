@@ -17,8 +17,7 @@ const embalagensOptions = ['Caixa', 'Pallet', 'Saco', 'Tambor', 'Big Bag', 'Fard
 
 export default function ConferentePage() {
   const navigate = useNavigate();
-  const { signOut } = useAuth();
-  const nome = sessionStorage.getItem('nome') || '';
+  const { signOut, nome } = useAuth();
   const [embarque, setEmbarque] = useState('');
   const [conferencia, setConferencia] = useState<Conferencia | null>(null);
   const [embarques, setEmbarques] = useState<Conferencia[]>([]);

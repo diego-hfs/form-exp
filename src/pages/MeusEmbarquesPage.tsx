@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -33,8 +34,8 @@ function getEtapaVariant(c: Conferencia): 'default' | 'secondary' | 'destructive
 
 export default function MeusEmbarquesPage() {
   const navigate = useNavigate();
-  const nome = sessionStorage.getItem('nome') || '';
-  const perfil = (sessionStorage.getItem('perfil') || 'separador') as 'separador' | 'conferente' | 'fiscal';
+  const { nome, perfil: authPerfil } = useAuth();
+  const perfil = authPerfil || 'separador';
   const [embarques, setEmbarques] = useState<Conferencia[]>([]);
   const [loading, setLoading] = useState(true);
 
