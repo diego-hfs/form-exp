@@ -53,7 +53,7 @@ export default function ConferentePage() {
     const initial: Record<string, Partial<ItemConferencia>> = {};
     found.itensSeparacao.forEach(item => {
       initial[item.id] = {
-        codigoProduto: '', lote: '', dataFabricacao: '', dataValidade: '',
+        codigoProduto: '', descricaoProduto: '', lote: '', dataFabricacao: '', dataValidade: '',
         tipoEmbalagem: '', quantidadePallets: 0, quantidade: 0,
       };
     });
@@ -95,6 +95,7 @@ export default function ConferentePage() {
     if (!sep || !conf) return null;
     return {
       codigoProduto: sep.codigoProduto === conf.codigoProduto,
+      descricaoProduto: sep.descricaoProduto === conf.descricaoProduto,
       lote: sep.lote === conf.lote,
       dataFabricacao: sep.dataFabricacao === conf.dataFabricacao,
       dataValidade: sep.dataValidade === conf.dataValidade,
@@ -106,7 +107,7 @@ export default function ConferentePage() {
 
   const isAllFilled = () => {
     return Object.values(conferencias).every(c =>
-      c.codigoProduto && c.lote && c.dataFabricacao && c.dataValidade &&
+      c.codigoProduto && c.descricaoProduto && c.lote && c.dataFabricacao && c.dataValidade &&
       c.tipoEmbalagem && (c.quantidadePallets ?? 0) > 0 && (c.quantidade ?? 0) > 0
     );
   };
@@ -125,6 +126,7 @@ export default function ConferentePage() {
         return {
           itemSeparacaoId: sep.id,
           codigoProduto: conf.codigoProduto || '',
+          descricaoProduto: conf.descricaoProduto || '',
           lote: conf.lote || '',
           dataFabricacao: conf.dataFabricacao || '',
           dataValidade: conf.dataValidade || '',
@@ -194,6 +196,7 @@ export default function ConferentePage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {[
                       { label: 'Código do Produto', field: 'codigoProduto' },
+                      { label: 'Descrição do Produto', field: 'descricaoProduto' },
                       { label: 'Lote', field: 'lote' },
                     ].map(({ label, field }) => (
                       <div key={field}>
