@@ -42,6 +42,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    const isNewTab = !sessionStorage.getItem('tab_initialized');
+
+    const init = async () => {
+      if (isNewTab) {
+        sessionStorage.setItem('tab_initialized', '1');
+        await supabase.auth.signOut();
+        setUser(null);
+        setSession(null);
+        setPerfil(null);
+        setLoading(false);
+        setPerfilLoading(false);
+        return;
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+      if (session?.user) {
+        fetchRole(session.user.id);
+      } else {
+        setPerfilLoading(false);
+      }
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -54,16 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-      if (session?.user) {
-        fetchRole(session.user.id);
-      } else {
-        setPerfilLoading(false);
-      }
-    });
+    init();
 
     return () => subscription.unsubscribe();
   }, []);
