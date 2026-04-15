@@ -6,6 +6,7 @@ function mapConferencia(row: any, itensSep: any[], itensConf: any[]): Conferenci
   return {
     id: row.id,
     numeroEmbarque: row.numero_embarque,
+    placaVeiculo: row.placa_veiculo ?? undefined,
     separador: row.separador,
     conferente: row.conferente ?? undefined,
     fiscal: row.fiscal ?? undefined,
