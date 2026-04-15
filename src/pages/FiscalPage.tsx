@@ -80,9 +80,9 @@ export default function FiscalPage() {
     setLoading(true);
     try {
       await saveDecisaoFiscal(conferencia.id, nome, decisao);
-      const updated = await getConferenciaPorEmbarque(conferencia.numeroEmbarque);
-      if (updated) setConferencia(updated);
       toast.success(decisao === 'aprovado' ? 'Expedição aprovada!' : 'Expedição bloqueada!');
+      setConferencia(null);
+      loadEmbarques();
     } catch (err: any) {
       toast.error(err.message || 'Erro ao salvar decisão.');
     } finally {
