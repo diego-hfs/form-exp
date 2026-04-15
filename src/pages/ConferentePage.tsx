@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -7,9 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { getConferenciaPorEmbarque, saveConferenciaConferente } from '@/services/storage';
+import { getConferenciaPorEmbarque, getEmbarquesParaConferente, saveConferenciaConferente } from '@/services/storage';
 import type { Conferencia, ItemConferencia } from '@/types/conferencia';
-import { ArrowLeft, Search, CheckCircle, XCircle, ClipboardList, LogOut } from 'lucide-react';
+import { ArrowLeft, Search, CheckCircle, XCircle, ClipboardList, LogOut, Package, ChevronLeft } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { toast } from 'sonner';
 
@@ -21,32 +21,59 @@ export default function ConferentePage() {
   const nome = sessionStorage.getItem('nome') || '';
   const [embarque, setEmbarque] = useState('');
   const [conferencia, setConferencia] = useState<Conferencia | null>(null);
+  const [embarques, setEmbarques] = useState<Conferencia[]>([]);
   const [conferencias, setConferencias] = useState<Record<string, Partial<ItemConferencia>>>({});
   const [finalizado, setFinalizado] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingList, setLoadingList] = useState(true);
+
+  useEffect(() => {
+    loadEmbarques();
+  }, []);
+
+  const loadEmbarques = async () => {
+    setLoadingList(true);
+    try {
+      const data = await getEmbarquesParaConferente();
+      setEmbarques(data);
+    } catch {
+      toast.error('Erro ao carregar embarques.');
+    } finally {
+      setLoadingList(false);
+    }
+  };
+
+  const selecionarEmbarque = (emb: Conferencia) => {
+    abrirConferencia(emb);
+  };
+
+  const abrirConferencia = (found: Conferencia) => {
+    setConferencia(found);
+    setFinalizado(false);
+    const initial: Record<string, Partial<ItemConferencia>> = {};
+    found.itensSeparacao.forEach(item => {
+      initial[item.id] = {
+        codigoProduto: '', lote: '', dataFabricacao: '', dataValidade: '',
+        tipoEmbalagem: '', quantidadePallets: 0, quantidade: 0,
+      };
+    });
+    setConferencias(initial);
+  };
+
+  const voltarParaLista = () => {
+    setConferencia(null);
+    setFinalizado(false);
+    loadEmbarques();
+  };
 
   const buscar = async () => {
+    if (!embarque.trim()) return;
     setLoading(true);
     try {
       const found = await getConferenciaPorEmbarque(embarque.trim());
-      if (!found) {
-        toast.error('Embarque não encontrado.');
-        return;
-      }
-      if (found.status !== 'aguardando_conferencia') {
-        toast.error('Este embarque já foi conferido.');
-        return;
-      }
-      setConferencia(found);
-      setFinalizado(false);
-      const initial: Record<string, Partial<ItemConferencia>> = {};
-      found.itensSeparacao.forEach(item => {
-        initial[item.id] = {
-          codigoProduto: '', lote: '', dataFabricacao: '', dataValidade: '',
-          tipoEmbalagem: '', quantidadePallets: 0, quantidade: 0,
-        };
-      });
-      setConferencias(initial);
+      if (!found) { toast.error('Embarque não encontrado.'); return; }
+      if (found.status !== 'aguardando_conferencia') { toast.error('Este embarque já foi conferido.'); return; }
+      abrirConferencia(found);
     } catch (err: any) {
       toast.error(err.message || 'Erro ao buscar embarque.');
     } finally {
@@ -66,7 +93,6 @@ export default function ConferentePage() {
     const sep = conferencia.itensSeparacao.find(i => i.id === itemId);
     const conf = conferencias[itemId];
     if (!sep || !conf) return null;
-
     return {
       codigoProduto: sep.codigoProduto === conf.codigoProduto,
       lote: sep.lote === conf.lote,
@@ -90,7 +116,6 @@ export default function ConferentePage() {
       toast.error('Preencha todos os campos de conferência.');
       return;
     }
-
     setLoading(true);
     try {
       const itensConf: Omit<ItemConferencia, 'id'>[] = conferencia.itensSeparacao.map(sep => {
@@ -115,7 +140,6 @@ export default function ConferentePage() {
 
       await saveConferenciaConferente(conferencia.id, nome, itensConf, status);
 
-      // Reload to get updated data
       const updated = await getConferenciaPorEmbarque(conferencia.numeroEmbarque);
       if (updated) setConferencia(updated);
       setFinalizado(true);
@@ -127,37 +151,21 @@ export default function ConferentePage() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-background p-4 max-w-5xl mx-auto">
-      <PageHeader>
-        <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold">Conferência</h1>
-          <p className="text-muted-foreground text-sm">Conferente: {nome}</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => navigate('/meus-embarques')}>
-            <ClipboardList className="w-4 h-4 mr-1" /> Meus Embarques
+  // Detail view
+  if (conferencia) {
+    return (
+      <div className="min-h-screen bg-background p-4 max-w-5xl mx-auto">
+        <PageHeader>
+          <Button variant="ghost" size="icon" onClick={voltarParaLista}>
+            <ChevronLeft className="w-5 h-5" />
           </Button>
-          <Button variant="ghost" size="sm" onClick={signOut} className="text-destructive">
-            <LogOut className="w-4 h-4 mr-1" /> Sair
-          </Button>
-        </div>
-      </PageHeader>
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold">Embarque {conferencia.numeroEmbarque}</h1>
+            <p className="text-muted-foreground text-sm">Conferente: {nome}</p>
+          </div>
+        </PageHeader>
 
-      <Card className="mb-4">
-        <CardContent className="pt-6 flex gap-3">
-          <Input className="h-12 text-lg flex-1" placeholder="Número de Embarque" value={embarque} onChange={e => setEmbarque(e.target.value)} />
-          <Button className="h-12 px-6" onClick={buscar} disabled={loading}>
-            <Search className="w-5 h-5 mr-2" /> {loading ? 'Buscando...' : 'Buscar'}
-          </Button>
-        </CardContent>
-      </Card>
-
-      {conferencia && (
-        <Card>
+        <Card className="mb-4">
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle className="text-lg">Embarque: {conferencia.numeroEmbarque}</CardTitle>
@@ -254,9 +262,80 @@ export default function ConferentePage() {
                 <CheckCircle className="w-5 h-5 mr-2" /> {loading ? 'Salvando...' : 'Finalizar Conferência'}
               </Button>
             )}
+
+            {finalizado && (
+              <Button className="w-full h-12" variant="outline" onClick={voltarParaLista}>
+                <ChevronLeft className="w-4 h-4 mr-2" /> Voltar para lista
+              </Button>
+            )}
           </CardContent>
         </Card>
-      )}
+      </div>
+    );
+  }
+
+  // List view
+  return (
+    <div className="min-h-screen bg-background p-4 max-w-5xl mx-auto">
+      <PageHeader>
+        <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
+          <ArrowLeft className="w-5 h-5" />
+        </Button>
+        <div className="flex-1">
+          <h1 className="text-2xl font-bold">Conferência</h1>
+          <p className="text-muted-foreground text-sm">Conferente: {nome}</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => navigate('/meus-embarques')}>
+            <ClipboardList className="w-4 h-4 mr-1" /> Meus Embarques
+          </Button>
+          <Button variant="ghost" size="sm" onClick={signOut} className="text-destructive">
+            <LogOut className="w-4 h-4 mr-1" /> Sair
+          </Button>
+        </div>
+      </PageHeader>
+
+      <Card className="mb-4">
+        <CardHeader><CardTitle className="text-lg">Embarques Disponíveis</CardTitle></CardHeader>
+        <CardContent>
+          {loadingList ? (
+            <p className="text-center text-muted-foreground py-4">Carregando...</p>
+          ) : embarques.length === 0 ? (
+            <div className="text-center py-6 text-muted-foreground">
+              <Package className="w-12 h-12 mx-auto mb-2 opacity-50" />
+              Nenhum embarque aguardando conferência.
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {embarques.map(emb => (
+                <div
+                  key={emb.id}
+                  onClick={() => selecionarEmbarque(emb)}
+                  className="flex items-center justify-between p-3 rounded-lg border cursor-pointer hover:bg-accent/50 transition-colors"
+                >
+                  <div className="flex-1">
+                    <p className="font-semibold text-base">{emb.numeroEmbarque}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Separador: {emb.separador} • {new Date(emb.dataSeparacao).toLocaleDateString('pt-BR')}
+                    </p>
+                  </div>
+                  <Badge variant="secondary">Aguardando Conferência</Badge>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle className="text-sm text-muted-foreground">Buscar por número</CardTitle></CardHeader>
+        <CardContent className="flex gap-3">
+          <Input className="h-12 text-lg flex-1" placeholder="Número de Embarque" value={embarque} onChange={e => setEmbarque(e.target.value)} />
+          <Button className="h-12 px-6" onClick={buscar} disabled={loading}>
+            <Search className="w-5 h-5 mr-2" /> {loading ? 'Buscando...' : 'Buscar'}
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }
