@@ -102,9 +102,15 @@ export default function SeparadorPage() {
       </PageHeader>
 
       <Card className="mb-4">
-        <CardContent className="pt-6">
-          <Label className="text-base font-semibold">Número de Embarque</Label>
-          <Input className="h-12 text-lg mt-2" placeholder="Ex: EMB-001" value={embarque} onChange={e => setEmbarque(e.target.value)} />
+        <CardContent className="pt-6 space-y-4">
+          <div>
+            <Label className="text-base font-semibold">Número de Embarque</Label>
+            <Input className="h-12 text-lg mt-2" placeholder="Ex: EMB-001" value={embarque} onChange={e => setEmbarque(e.target.value)} />
+          </div>
+          <div>
+            <Label className="text-base font-semibold">Placa do Veículo</Label>
+            <Input className="h-12 text-lg mt-2" placeholder="Ex: ABC-1234" value={placaVeiculo} onChange={e => setPlacaVeiculo(e.target.value.toUpperCase())} />
+          </div>
         </CardContent>
       </Card>
 

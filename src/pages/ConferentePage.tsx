@@ -174,6 +174,9 @@ export default function ConferentePage() {
               </Badge>
             </div>
             <p className="text-sm text-muted-foreground">Separador: {conferencia.separador}</p>
+            {conferencia.placaVeiculo && (
+              <p className="text-sm text-muted-foreground">Placa do Veículo: {conferencia.placaVeiculo}</p>
+            )}
           </CardHeader>
           <CardContent className="space-y-6">
             {conferencia.itensSeparacao.map((sep, idx) => {
