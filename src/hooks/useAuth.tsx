@@ -1,7 +1,19 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
 import type { Perfil } from '@/types/conferencia';
+
+const TAB_ID_KEY = 'auth_tab_id';
+const TAB_AUTHORIZED_KEY = 'auth_tab_authorized';
+const AUTH_CHANNEL_NAME = 'auth-tab-sync';
+
+const createTabId = () => {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID();
+  }
+
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+};
 
 interface AuthContextType {
   user: User | null;
@@ -10,6 +22,8 @@ interface AuthContextType {
   perfil: Perfil | null;
   perfilLoading: boolean;
   nome: string;
+  authorizeTab: () => void;
+  resetTabAuthorization: () => void;
   signOut: () => Promise<void>;
 }
 
@@ -20,6 +34,8 @@ const AuthContext = createContext<AuthContextType>({
   perfil: null,
   perfilLoading: true,
   nome: '',
+  authorizeTab: () => {},
+  resetTabAuthorization: () => {},
   signOut: async () => {},
 });
 
@@ -29,6 +45,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [perfil, setPerfil] = useState<Perfil | null>(null);
   const [perfilLoading, setPerfilLoading] = useState(true);
+  const tabInstanceIdRef = useRef(createTabId());
+  const tabAuthorizedRef = useRef(false);
+
+  const clearLocalState = () => {
+    setUser(null);
+    setSession(null);
+    setPerfil(null);
+    setLoading(false);
+    setPerfilLoading(false);
+    sessionStorage.removeItem('perfil');
+    sessionStorage.removeItem('nome');
+  };
+
+  const authorizeTab = () => {
+    sessionStorage.setItem(TAB_AUTHORIZED_KEY, '1');
+    tabAuthorizedRef.current = true;
+  };
+
+  const resetTabAuthorization = () => {
+    sessionStorage.removeItem(TAB_AUTHORIZED_KEY);
+    tabAuthorizedRef.current = false;
+  };
 
   const fetchRole = async (userId: string) => {
     setPerfilLoading(true);
@@ -42,21 +80,73 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    const isNewTab = !sessionStorage.getItem('tab_initialized');
+    const tabId = sessionStorage.getItem(TAB_ID_KEY);
+    const channel = typeof BroadcastChannel !== 'undefined'
+      ? new BroadcastChannel(AUTH_CHANNEL_NAME)
+      : null;
+    let isMounted = true;
+    let duplicateTabDetected = false;
+
+    const denyTabAccess = () => {
+      resetTabAuthorization();
+      clearLocalState();
+    };
+
+    if (channel) {
+      channel.onmessage = (event) => {
+        const message = event.data;
+
+        if (
+          message?.type === 'presence-check' &&
+          message.tabId === sessionStorage.getItem(TAB_ID_KEY) &&
+          message.instanceId !== tabInstanceIdRef.current
+        ) {
+          channel.postMessage({
+            type: 'presence-response',
+            tabId: message.tabId,
+            targetInstanceId: message.instanceId,
+          });
+        }
+
+        if (
+          message?.type === 'presence-response' &&
+          message.tabId === sessionStorage.getItem(TAB_ID_KEY) &&
+          message.targetInstanceId === tabInstanceIdRef.current
+        ) {
+          duplicateTabDetected = true;
+          if (isMounted) denyTabAccess();
+        }
+      };
+    }
 
     const init = async () => {
-      if (isNewTab) {
-        sessionStorage.setItem('tab_initialized', '1');
-        await supabase.auth.signOut();
-        setUser(null);
-        setSession(null);
-        setPerfil(null);
-        setLoading(false);
-        setPerfilLoading(false);
+      if (!tabId) {
+        sessionStorage.setItem(TAB_ID_KEY, createTabId());
+        denyTabAccess();
+        return;
+      }
+
+      channel?.postMessage({
+        type: 'presence-check',
+        tabId,
+        instanceId: tabInstanceIdRef.current,
+      });
+
+      await new Promise(resolve => window.setTimeout(resolve, 120));
+
+      if (!isMounted || duplicateTabDetected) return;
+
+      const isAuthorizedTab = sessionStorage.getItem(TAB_AUTHORIZED_KEY) === '1';
+      tabAuthorizedRef.current = isAuthorizedTab;
+
+      if (!isAuthorizedTab) {
+        clearLocalState();
         return;
       }
 
       const { data: { session } } = await supabase.auth.getSession();
+      if (!isMounted) return;
+
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -67,7 +157,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!isMounted) return;
+
+      if (event === 'SIGNED_OUT') {
+        denyTabAccess();
+        return;
+      }
+
+      if (!tabAuthorizedRef.current) {
+        setLoading(false);
+        setPerfilLoading(false);
+        return;
+      }
+
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -81,22 +184,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     init();
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+      channel?.close();
+    };
   }, []);
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    setPerfil(null);
-    setUser(null);
-    setSession(null);
-    sessionStorage.removeItem('perfil');
-    sessionStorage.removeItem('nome');
+    resetTabAuthorization();
+    clearLocalState();
   };
 
   const nome = user?.user_metadata?.nome?.split(' ')[0] || '';
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, perfil, perfilLoading, nome, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, perfil, perfilLoading, nome, authorizeTab, resetTabAuthorization, signOut }}>
       {children}
     </AuthContext.Provider>
   );
