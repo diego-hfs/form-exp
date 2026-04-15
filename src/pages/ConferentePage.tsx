@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { DatePickerBR } from '@/components/DatePickerBR';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
@@ -189,21 +190,37 @@ export default function ConferentePage() {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {[
-                      { label: 'Código do Produto', field: 'codigoProduto', type: 'text' },
-                      { label: 'Lote', field: 'lote', type: 'text' },
-                      { label: 'Data de Fabricação', field: 'dataFabricacao', type: 'date' },
-                      { label: 'Data de Validade', field: 'dataValidade', type: 'date' },
-                    ].map(({ label, field, type }) => (
+                      { label: 'Código do Produto', field: 'codigoProduto' },
+                      { label: 'Lote', field: 'lote' },
+                    ].map(({ label, field }) => (
                       <div key={field}>
                         <Label className={finalizado && cmp ? (cmp[field as keyof typeof cmp] ? 'text-success' : 'text-destructive font-bold') : ''}>
                           {label} *
                         </Label>
                         <Input
-                          type={type}
+                          type="text"
                           className={`h-11 ${finalizado && cmp && !cmp[field as keyof typeof cmp] ? 'border-destructive border-2' : ''}`}
                           value={(conferencias[sep.id] as any)?.[field] || ''}
                           onChange={e => updateConf(sep.id, field, e.target.value)}
                           disabled={finalizado}
+                        />
+                        {finalizado && cmp && !cmp[field as keyof typeof cmp] && (
+                          <p className="text-xs text-destructive mt-1">Esperado: {(sep as any)[field]}</p>
+                        )}
+                      </div>
+                    ))}
+                    {[
+                      { label: 'Data de Fabricação', field: 'dataFabricacao' },
+                      { label: 'Data de Validade', field: 'dataValidade' },
+                    ].map(({ label, field }) => (
+                      <div key={field}>
+                        <Label className={finalizado && cmp ? (cmp[field as keyof typeof cmp] ? 'text-success' : 'text-destructive font-bold') : ''}>
+                          {label} *
+                        </Label>
+                        <DatePickerBR
+                          value={(conferencias[sep.id] as any)?.[field] || ''}
+                          onChange={v => updateConf(sep.id, field, v)}
+                          className={finalizado && cmp && !cmp[field as keyof typeof cmp] ? 'border-destructive border-2' : ''}
                         />
                         {finalizado && cmp && !cmp[field as keyof typeof cmp] && (
                           <p className="text-xs text-destructive mt-1">Esperado: {(sep as any)[field]}</p>
