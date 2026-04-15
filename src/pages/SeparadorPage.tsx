@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { DatePickerBR } from '@/components/DatePickerBR';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { saveConferenciaSeparacao } from '@/services/storage';
@@ -137,11 +138,11 @@ export default function SeparadorPage() {
                 </div>
                 <div>
                   <Label>Data de Fabricação *</Label>
-                  <Input type="date" className="h-11" value={item.dataFabricacao} onChange={e => updateItem(idx, 'dataFabricacao', e.target.value)} />
+                  <DatePickerBR value={item.dataFabricacao || ''} onChange={v => updateItem(idx, 'dataFabricacao', v)} />
                 </div>
                 <div>
                   <Label>Data de Validade *</Label>
-                  <Input type="date" className="h-11" value={item.dataValidade} onChange={e => updateItem(idx, 'dataValidade', e.target.value)} />
+                  <DatePickerBR value={item.dataValidade || ''} onChange={v => updateItem(idx, 'dataValidade', v)} />
                 </div>
                 <div>
                   <Label>Tipo de Embalagem *</Label>
