@@ -70,7 +70,6 @@ export default function SeparadorPage() {
         })),
         placaVeiculo.trim() || undefined
       );
-      );
       toast.success('Separação finalizada com sucesso!');
       setEmbarque('');
       setPlacaVeiculo('');
