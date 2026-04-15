@@ -9,6 +9,7 @@ interface AuthContextType {
   loading: boolean;
   perfil: Perfil | null;
   perfilLoading: boolean;
+  nome: string;
   signOut: () => Promise<void>;
 }
 
@@ -18,6 +19,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   perfil: null,
   perfilLoading: true,
+  nome: '',
   signOut: async () => {},
 });
 
@@ -76,9 +78,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, perfil, perfilLoading, signOut }}>
+    const nome = user?.user_metadata?.nome?.split(' ')[0] || '';
+
+    return (
+    <AuthContext.Provider value={{ user, session, loading, perfil, perfilLoading, nome, signOut }}>
       {children}
     </AuthContext.Provider>
+    );
   );
 }
 
