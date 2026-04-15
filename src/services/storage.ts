@@ -61,13 +61,15 @@ export async function getConferenciaPorEmbarque(numero: string): Promise<Confere
 export async function saveConferenciaSeparacao(
   embarque: string,
   separador: string,
-  itens: Omit<ItemSeparacao, 'id'>[]
+  itens: Omit<ItemSeparacao, 'id'>[],
+  placaVeiculo?: string
 ): Promise<void> {
   const { data: conf, error } = await supabase
     .from('conferencias')
     .insert({
       numero_embarque: embarque,
       separador,
+      placa_veiculo: placaVeiculo || null,
       status: 'aguardando_conferencia',
     })
     .select()

@@ -25,6 +25,7 @@ export default function SeparadorPage() {
   const navigate = useNavigate();
   const { signOut, nome } = useAuth();
   const [embarque, setEmbarque] = useState('');
+  const [placaVeiculo, setPlacaVeiculo] = useState('');
   const [itens, setItens] = useState<Partial<ItemSeparacao>[]>([emptyItem()]);
   const [loading, setLoading] = useState(false);
 
