@@ -12,7 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 export default function AuthPage() {
   const navigate = useNavigate();
-  const { user, perfil } = useAuth();
+  const { user, perfil, authorizeTab, resetTabAuthorization } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
@@ -44,11 +44,13 @@ export default function AuthPage() {
           .maybeSingle();
 
         if (!profile) {
+          resetTabAuthorization();
           toast.error('Usuário não encontrado. Verifique o nome.');
           setLoading(false);
           return;
         }
 
+        authorizeTab();
         const { error } = await supabase.auth.signInWithPassword({
           email: profile.email_gerado,
           password,
@@ -59,6 +61,7 @@ export default function AuthPage() {
         // Usar e-mail informado ou gerar um automático
         const emailFinal = email.trim() || gerarEmail(nome);
 
+        authorizeTab();
         const { data, error } = await supabase.auth.signUp({
           email: emailFinal,
           password,
@@ -77,6 +80,7 @@ export default function AuthPage() {
         setPassword('');
       }
     } catch (err: any) {
+      resetTabAuthorization();
       toast.error(err.message || 'Erro na autenticação.');
     } finally {
       setLoading(false);
