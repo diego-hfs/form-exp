@@ -77,14 +77,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     sessionStorage.removeItem('nome');
   };
 
-  return (
-    const nome = user?.user_metadata?.nome?.split(' ')[0] || '';
+  const nome = user?.user_metadata?.nome?.split(' ')[0] || '';
 
-    return (
+  return (
     <AuthContext.Provider value={{ user, session, loading, perfil, perfilLoading, nome, signOut }}>
       {children}
     </AuthContext.Provider>
-    );
   );
 }
 
