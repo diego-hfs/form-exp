@@ -69,6 +69,7 @@ export type Database = {
           created_at: string
           data_fabricacao: string
           data_validade: string
+          descricao_produto: string
           id: string
           item_separacao_id: string
           lote: string
@@ -83,6 +84,7 @@ export type Database = {
           created_at?: string
           data_fabricacao: string
           data_validade: string
+          descricao_produto?: string
           id?: string
           item_separacao_id: string
           lote: string
@@ -97,6 +99,7 @@ export type Database = {
           created_at?: string
           data_fabricacao?: string
           data_validade?: string
+          descricao_produto?: string
           id?: string
           item_separacao_id?: string
           lote?: string

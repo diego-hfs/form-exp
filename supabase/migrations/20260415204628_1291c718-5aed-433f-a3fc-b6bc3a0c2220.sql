@@ -1,0 +1,1 @@
+ALTER TABLE public.itens_conferencia ADD COLUMN descricao_produto text NOT NULL DEFAULT '';
