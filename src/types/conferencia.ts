@@ -23,6 +23,7 @@ export interface ItemConferencia {
   id: string;
   itemSeparacaoId: string;
   codigoProduto: string;
+  descricaoProduto: string;
   lote: string;
   dataFabricacao: string;
   dataValidade: string;
