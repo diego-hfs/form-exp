@@ -357,7 +357,7 @@ export default function ConferentePage() {
                   <div className="flex-1">
                     <p className="font-semibold text-base">{emb.numeroEmbarque}</p>
                     <p className="text-xs text-muted-foreground">
-                      Separador: {emb.separador} • {new Date(emb.dataSeparacao).toLocaleDateString('pt-BR')}
+                      Placa: {emb.placaVeiculo || '-'} • Separador: {emb.separador} • {new Date(emb.dataSeparacao).toLocaleDateString('pt-BR')}
                     </p>
                   </div>
                   <Badge variant="secondary">Aguardando Conferência</Badge>
