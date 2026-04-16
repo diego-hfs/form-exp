@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Package } from 'lucide-react';
+import { ArrowLeft, Package, Search } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { getConferenciasPorUsuario } from '@/services/storage';
 import type { Conferencia } from '@/types/conferencia';
@@ -38,6 +39,12 @@ export default function MeusEmbarquesPage() {
   const perfil = authPerfil || 'separador';
   const [embarques, setEmbarques] = useState<Conferencia[]>([]);
   const [loading, setLoading] = useState(true);
+  const [busca, setBusca] = useState('');
+
+  const embarquesFiltrados = useMemo(
+    () => embarques.filter(e => e.numeroEmbarque.toLowerCase().includes(busca.trim().toLowerCase())),
+    [embarques, busca]
+  );
 
   const backRoute = `/${perfil}`;
   const perfilLabel = perfil === 'conferente' ? 'Conferente' : perfil === 'fiscal' ? 'Fiscal' : 'Separador';
@@ -71,18 +78,32 @@ export default function MeusEmbarquesPage() {
         </div>
       </PageHeader>
 
+      <Card className="mb-4">
+        <CardContent className="pt-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              className="h-11 pl-9"
+              placeholder="Buscar por número de embarque..."
+              value={busca}
+              onChange={e => setBusca(e.target.value)}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       {loading ? (
         <p className="text-center text-muted-foreground mt-8">Carregando...</p>
-      ) : embarques.length === 0 ? (
+      ) : embarquesFiltrados.length === 0 ? (
         <Card className="mt-4">
           <CardContent className="py-8 text-center text-muted-foreground">
             <Package className="w-12 h-12 mx-auto mb-2 opacity-50" />
-            Nenhum embarque encontrado.
+            {embarques.length === 0 ? 'Nenhum embarque encontrado.' : 'Nenhum embarque corresponde à busca.'}
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-3 mt-4">
-          {embarques.map(emb => (
+          {embarquesFiltrados.map(emb => (
             <Card key={emb.id}>
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
