@@ -41,10 +41,14 @@ export default function MeusEmbarquesPage() {
   const [loading, setLoading] = useState(true);
   const [busca, setBusca] = useState('');
 
-  const embarquesFiltrados = useMemo(
-    () => embarques.filter(e => e.numeroEmbarque.toLowerCase().includes(busca.trim().toLowerCase())),
-    [embarques, busca]
-  );
+  const embarquesFiltrados = useMemo(() => {
+    const q = busca.trim().toLowerCase();
+    if (!q) return embarques;
+    return embarques.filter(e =>
+      e.numeroEmbarque.toLowerCase().includes(q) ||
+      (e.placaVeiculo || '').toLowerCase().includes(q)
+    );
+  }, [embarques, busca]);
 
   const backRoute = `/${perfil}`;
   const perfilLabel = perfil === 'conferente' ? 'Conferente' : perfil === 'fiscal' ? 'Fiscal' : 'Separador';
@@ -84,7 +88,7 @@ export default function MeusEmbarquesPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               className="h-11 pl-9"
-              placeholder="Buscar por número de embarque..."
+              placeholder="Buscar por número de embarque ou placa..."
               value={busca}
               onChange={e => setBusca(e.target.value)}
             />
