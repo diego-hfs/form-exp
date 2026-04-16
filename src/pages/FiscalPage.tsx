@@ -243,9 +243,9 @@ export default function FiscalPage() {
 
       {/* Search box */}
       <Card className="mb-4">
-        <CardHeader><CardTitle className="text-sm text-muted-foreground">Buscar por número</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-sm text-muted-foreground">Buscar por número ou placa</CardTitle></CardHeader>
         <CardContent className="flex gap-3">
-          <Input className="h-12 text-lg flex-1" placeholder="Número de Embarque" value={embarque} onChange={e => setEmbarque(e.target.value)} />
+          <Input className="h-12 text-lg flex-1" placeholder="Número de Embarque ou Placa do Veículo" value={embarque} onChange={e => setEmbarque(e.target.value)} />
           <Button className="h-12 px-6" onClick={buscar} disabled={loading}>
             <Search className="w-5 h-5 mr-2" /> {loading ? 'Buscando...' : 'Buscar'}
           </Button>
@@ -266,7 +266,10 @@ export default function FiscalPage() {
           ) : (
             <div className="space-y-2">
               {embarques
-                .filter(emb => emb.numeroEmbarque.toLowerCase().includes(embarque.trim().toLowerCase()))
+                .filter(emb => {
+                  const q = embarque.trim().toLowerCase();
+                  return emb.numeroEmbarque.toLowerCase().includes(q) || (emb.placaVeiculo || '').toLowerCase().includes(q);
+                })
                 .map(emb => (
                 <div
                   key={emb.id}
