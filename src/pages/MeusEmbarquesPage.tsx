@@ -111,7 +111,10 @@ export default function MeusEmbarquesPage() {
             <Card key={emb.id}>
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-base font-semibold">{emb.numeroEmbarque}</CardTitle>
+                  <div>
+                    <CardTitle className="text-base font-semibold">{emb.numeroEmbarque}</CardTitle>
+                    <p className="text-xs text-muted-foreground mt-0.5">Placa: {emb.placaVeiculo || '-'}</p>
+                  </div>
                   <div className="flex gap-2">
                     <Badge variant={getEtapaVariant(emb)}>{getEtapa(emb)}</Badge>
                     <Badge variant={getStatusVariant(emb)}>{getStatusLabel(emb)}</Badge>
