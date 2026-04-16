@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import logoNitro from '@/assets/logo-nitro.jpg';
+import logoNitro from '@/assets/logo-nitro.png';
 import { LogOut } from 'lucide-react';
 
 export default function LoginPage() {
