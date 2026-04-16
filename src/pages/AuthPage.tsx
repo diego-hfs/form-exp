@@ -98,7 +98,7 @@ export default function AuthPage() {
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center space-y-2">
           <div className="mx-auto">
-            <img src={logoNitro} alt="Nitro" className="h-28 object-contain mx-auto" />
+            <img src={logoNitro} alt="Nitro" className="h-44 object-contain mx-auto" />
           </div>
           <CardTitle className="text-2xl font-bold">Formulário Conferência de Expedição</CardTitle>
           <p className="text-muted-foreground text-sm">

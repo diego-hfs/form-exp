@@ -39,7 +39,7 @@ export default function LoginPage() {
               </Button>
             </div>
             <div className="mx-auto">
-              <img src={logoNitro} alt="Nitro" className="h-28 object-contain mx-auto" />
+              <img src={logoNitro} alt="Nitro" className="h-44 object-contain mx-auto" />
             </div>
             <CardTitle className="text-xl font-bold">Perfil não configurado</CardTitle>
             <p className="text-muted-foreground text-sm">
