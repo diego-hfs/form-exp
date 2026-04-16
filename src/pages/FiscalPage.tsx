@@ -96,6 +96,12 @@ export default function FiscalPage() {
   const hasDivergencia = conferencia?.itensConferencia.some(i => i.status === 'divergente');
   const isFinalizado = conferencia?.status === 'aprovado' || conferencia?.status === 'bloqueado';
   const formatDate = (d?: string) => d ? new Date(d).toLocaleString('pt-BR') : '-';
+  const formatDateBR = (d?: string) => {
+    if (!d) return '-';
+    const [y, m, day] = d.split('-');
+    if (y && m && day) return `${day}/${m}/${y}`;
+    return d;
+  };
 
   // Detail view
   if (conferencia) {
@@ -143,8 +149,8 @@ export default function FiscalPage() {
                 { label: 'Código', sepVal: sep.codigoProduto, confVal: conf?.codigoProduto },
                 { label: 'Descrição', sepVal: sep.descricaoProduto, confVal: conf?.descricaoProduto },
                 { label: 'Lote', sepVal: sep.lote, confVal: conf?.lote },
-                { label: 'Fabricação', sepVal: sep.dataFabricacao, confVal: conf?.dataFabricacao },
-                { label: 'Validade', sepVal: sep.dataValidade, confVal: conf?.dataValidade },
+                { label: 'Fabricação', sepVal: formatDateBR(sep.dataFabricacao), confVal: formatDateBR(conf?.dataFabricacao) },
+                { label: 'Validade', sepVal: formatDateBR(sep.dataValidade), confVal: formatDateBR(conf?.dataValidade) },
                 { label: 'Embalagem', sepVal: sep.tipoEmbalagem, confVal: conf?.tipoEmbalagem },
                 { label: 'Pallets', sepVal: String(sep.quantidadePallets), confVal: String(conf?.quantidadePallets) },
                 { label: 'Quantidade', sepVal: String(sep.quantidade), confVal: String(conf?.quantidade) },
