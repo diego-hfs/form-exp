@@ -279,7 +279,7 @@ export default function FiscalPage() {
                   <div className="flex-1">
                     <p className="font-semibold text-base">{emb.numeroEmbarque}</p>
                     <p className="text-xs text-muted-foreground">
-                      Separador: {emb.separador} • Conferente: {emb.conferente || '-'} • {new Date(emb.dataSeparacao).toLocaleDateString('pt-BR')}
+                      Placa: {emb.placaVeiculo || '-'} • Separador: {emb.separador} • Conferente: {emb.conferente || '-'} • {new Date(emb.dataSeparacao).toLocaleDateString('pt-BR')}
                     </p>
                   </div>
                   <div className="flex gap-2 items-center">
