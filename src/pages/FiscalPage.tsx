@@ -38,7 +38,7 @@ export default function FiscalPage() {
     loadEmbarques();
     const interval = setInterval(() => {
       if (!conferencia) loadEmbarques(true);
-    }, 15000);
+    }, 10000);
     return () => clearInterval(interval);
   }, [conferencia]);
 

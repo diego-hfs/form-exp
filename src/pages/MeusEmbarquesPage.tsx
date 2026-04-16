@@ -50,7 +50,7 @@ export default function MeusEmbarquesPage() {
       if (!silent) setLoading(false);
     };
     load();
-    const interval = setInterval(() => load(true), 15000);
+    const interval = setInterval(() => load(true), 10000);
     return () => clearInterval(interval);
   }, [nome, perfil]);
 
