@@ -141,6 +141,7 @@ export default function FiscalPage() {
               const conf = conferencia.itensConferencia.find(c => c.itemSeparacaoId === sep.id);
               const fields = [
                 { label: 'Código', sepVal: sep.codigoProduto, confVal: conf?.codigoProduto },
+                { label: 'Descrição', sepVal: sep.descricaoProduto, confVal: conf?.descricaoProduto },
                 { label: 'Lote', sepVal: sep.lote, confVal: conf?.lote },
                 { label: 'Fabricação', sepVal: sep.dataFabricacao, confVal: conf?.dataFabricacao },
                 { label: 'Validade', sepVal: sep.dataValidade, confVal: conf?.dataValidade },
