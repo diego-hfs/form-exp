@@ -29,17 +29,21 @@ export default function ConferentePage() {
 
   useEffect(() => {
     loadEmbarques();
-  }, []);
+    const interval = setInterval(() => {
+      if (!conferencia) loadEmbarques(true);
+    }, 15000);
+    return () => clearInterval(interval);
+  }, [conferencia]);
 
-  const loadEmbarques = async () => {
-    setLoadingList(true);
+  const loadEmbarques = async (silent = false) => {
+    if (!silent) setLoadingList(true);
     try {
       const data = await getEmbarquesParaConferente();
       setEmbarques(data);
     } catch {
-      toast.error('Erro ao carregar embarques.');
+      if (!silent) toast.error('Erro ao carregar embarques.');
     } finally {
-      setLoadingList(false);
+      if (!silent) setLoadingList(false);
     }
   };
 
