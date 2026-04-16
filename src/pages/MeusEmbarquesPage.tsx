@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Package } from 'lucide-react';
+import { ArrowLeft, Package, Search } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { getConferenciasPorUsuario } from '@/services/storage';
 import type { Conferencia } from '@/types/conferencia';
@@ -38,6 +39,12 @@ export default function MeusEmbarquesPage() {
   const perfil = authPerfil || 'separador';
   const [embarques, setEmbarques] = useState<Conferencia[]>([]);
   const [loading, setLoading] = useState(true);
+  const [busca, setBusca] = useState('');
+
+  const embarquesFiltrados = useMemo(
+    () => embarques.filter(e => e.numeroEmbarque.toLowerCase().includes(busca.trim().toLowerCase())),
+    [embarques, busca]
+  );
 
   const backRoute = `/${perfil}`;
   const perfilLabel = perfil === 'conferente' ? 'Conferente' : perfil === 'fiscal' ? 'Fiscal' : 'Separador';
