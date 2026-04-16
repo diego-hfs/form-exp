@@ -10,7 +10,7 @@ export default function PageHeader({ children }: PageHeaderProps) {
       <div className="flex items-center gap-3">
         {children}
       </div>
-      <img src={logoNitro} alt="Nitro" className="h-10 object-contain" />
+      <img src={logoNitro} alt="Nitro" className="h-20 object-contain" />
     </div>
   );
 }
