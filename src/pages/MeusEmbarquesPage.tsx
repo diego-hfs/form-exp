@@ -78,18 +78,32 @@ export default function MeusEmbarquesPage() {
         </div>
       </PageHeader>
 
+      <Card className="mb-4">
+        <CardContent className="pt-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              className="h-11 pl-9"
+              placeholder="Buscar por número de embarque..."
+              value={busca}
+              onChange={e => setBusca(e.target.value)}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       {loading ? (
         <p className="text-center text-muted-foreground mt-8">Carregando...</p>
-      ) : embarques.length === 0 ? (
+      ) : embarquesFiltrados.length === 0 ? (
         <Card className="mt-4">
           <CardContent className="py-8 text-center text-muted-foreground">
             <Package className="w-12 h-12 mx-auto mb-2 opacity-50" />
-            Nenhum embarque encontrado.
+            {embarques.length === 0 ? 'Nenhum embarque encontrado.' : 'Nenhum embarque corresponde à busca.'}
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-3 mt-4">
-          {embarques.map(emb => (
+          {embarquesFiltrados.map(emb => (
             <Card key={emb.id}>
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
