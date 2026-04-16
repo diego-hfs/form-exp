@@ -30,7 +30,7 @@ export default function ConferentePage() {
   useEffect(() => {
     loadEmbarques();
     const interval = setInterval(() => {
-      if (!conferencia) loadEmbarques();
+      if (!conferencia) loadEmbarques(true);
     }, 15000);
     return () => clearInterval(interval);
   }, [conferencia]);
