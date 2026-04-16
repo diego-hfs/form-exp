@@ -1,4 +1,4 @@
-import logoNitro from '@/assets/logo-nitro.jpg';
+import logoNitro from '@/assets/logo-nitro.png';
 
 interface PageHeaderProps {
   children?: React.ReactNode;
