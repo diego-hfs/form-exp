@@ -29,7 +29,11 @@ export default function ConferentePage() {
 
   useEffect(() => {
     loadEmbarques();
-  }, []);
+    const interval = setInterval(() => {
+      if (!conferencia) loadEmbarques();
+    }, 15000);
+    return () => clearInterval(interval);
+  }, [conferencia]);
 
   const loadEmbarques = async () => {
     setLoadingList(true);
