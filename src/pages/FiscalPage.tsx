@@ -42,15 +42,15 @@ export default function FiscalPage() {
     return () => clearInterval(interval);
   }, [conferencia]);
 
-  const loadEmbarques = async () => {
-    setLoadingList(true);
+  const loadEmbarques = async (silent = false) => {
+    if (!silent) setLoadingList(true);
     try {
       const data = await getEmbarquesParaFiscal();
       setEmbarques(data);
     } catch {
-      toast.error('Erro ao carregar embarques.');
+      if (!silent) toast.error('Erro ao carregar embarques.');
     } finally {
-      setLoadingList(false);
+      if (!silent) setLoadingList(false);
     }
   };
 
