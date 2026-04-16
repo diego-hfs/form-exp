@@ -9,6 +9,7 @@ import { ArrowLeft, Package, Search } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { getConferenciasPorUsuario } from '@/services/storage';
 import type { Conferencia } from '@/types/conferencia';
+import EmbarqueDetalhesDialog from '@/components/EmbarqueDetalhesDialog';
 
 function getEtapa(c: Conferencia) {
   if (c.status === 'aprovado' || c.status === 'bloqueado') return 'Fiscal';
@@ -40,6 +41,8 @@ export default function MeusEmbarquesPage() {
   const [embarques, setEmbarques] = useState<Conferencia[]>([]);
   const [loading, setLoading] = useState(true);
   const [busca, setBusca] = useState('');
+  const [selecionado, setSelecionado] = useState<Conferencia | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const embarquesFiltrados = useMemo(() => {
     const q = busca.trim().toLowerCase();
@@ -108,7 +111,11 @@ export default function MeusEmbarquesPage() {
       ) : (
         <div className="space-y-3 mt-4">
           {embarquesFiltrados.map(emb => (
-            <Card key={emb.id}>
+            <Card
+              key={emb.id}
+              onClick={() => { setSelecionado(emb); setDialogOpen(true); }}
+              className="cursor-pointer hover:bg-accent/40 transition-colors"
+            >
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <div>
@@ -151,6 +158,12 @@ export default function MeusEmbarquesPage() {
           ))}
         </div>
       )}
+
+      <EmbarqueDetalhesDialog
+        embarque={selecionado}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+      />
     </div>
   );
 }
