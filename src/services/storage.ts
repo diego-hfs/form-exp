@@ -257,7 +257,7 @@ export async function saveDecisaoFiscal(
   fiscal: string,
   decisao: 'aprovado' | 'bloqueado'
 ): Promise<void> {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('conferencias')
     .update({
       fiscal,
@@ -265,9 +265,13 @@ export async function saveDecisaoFiscal(
       decisao_fiscal: decisao,
       data_fiscal: new Date().toISOString(),
     })
-    .eq('id', conferenciaId);
+    .eq('id', conferenciaId)
+    .select();
 
   if (error) throw new Error(error.message);
+  if (!data || data.length === 0) {
+    throw new Error('Você não tem permissão para alterar este embarque ou o status mudou. Recarregue a página.');
+  }
 }
 
 export async function reabrirConferencia(conferenciaId: string): Promise<void> {
