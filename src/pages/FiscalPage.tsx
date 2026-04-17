@@ -84,11 +84,26 @@ export default function FiscalPage() {
     setLoading(true);
     try {
       await saveDecisaoFiscal(conferencia.id, nome, decisao);
-      toast.success(decisao === 'aprovado' ? 'Expedição aprovada!' : 'Expedição bloqueada!');
+      toast.success(decisao === 'aprovado' ? 'Expedição aprovada!' : 'Expedição finalizada com divergência!');
       setConferencia(null);
       loadEmbarques();
     } catch (err: any) {
       toast.error(err.message || 'Erro ao salvar decisão.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReabrir = async () => {
+    if (!conferencia) return;
+    setLoading(true);
+    try {
+      await reabrirConferencia(conferencia.id);
+      toast.success('Conferência reaberta! Tarefa devolvida ao Conferente.');
+      setConferencia(null);
+      loadEmbarques();
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao reabrir conferência.');
     } finally {
       setLoading(false);
     }
