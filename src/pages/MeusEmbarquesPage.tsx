@@ -165,6 +165,7 @@ export default function MeusEmbarquesPage() {
         embarque={selecionado}
         open={dialogOpen}
         onOpenChange={setDialogOpen}
+        onReaberto={() => load()}
       />
     </div>
   );
