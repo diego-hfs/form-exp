@@ -235,7 +235,7 @@ export default function FiscalPage() {
           </Card>
         )}
 
-        {(hasDivergencia || conferencia.status === 'bloqueado') && (
+        {(conferencia.status === 'conferido' || conferencia.status === 'divergente' || conferencia.status === 'aprovado' || conferencia.status === 'bloqueado') && (
           <div className="mt-4">
             <AlertDialog>
               <AlertDialogTrigger asChild>
