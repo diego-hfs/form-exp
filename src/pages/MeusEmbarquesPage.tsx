@@ -56,16 +56,18 @@ export default function MeusEmbarquesPage() {
   const backRoute = `/${perfil}`;
   const perfilLabel = perfil === 'conferente' ? 'Conferente' : perfil === 'fiscal' ? 'Fiscal' : 'Separador';
 
+  const load = async (silent = false) => {
+    if (!silent) setLoading(true);
+    const data = await getConferenciasPorUsuario(nome, perfil);
+    setEmbarques(data);
+    if (!silent) setLoading(false);
+  };
+
   useEffect(() => {
-    const load = async (silent = false) => {
-      if (!silent) setLoading(true);
-      const data = await getConferenciasPorUsuario(nome, perfil);
-      setEmbarques(data);
-      if (!silent) setLoading(false);
-    };
     load();
     const interval = setInterval(() => load(true), 10000);
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nome, perfil]);
 
   const formatDate = (d?: string) => {
