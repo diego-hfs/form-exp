@@ -10,6 +10,7 @@ import LoginPage from "./pages/LoginPage";
 import SeparadorPage from "./pages/SeparadorPage";
 import MeusEmbarquesPage from "./pages/MeusEmbarquesPage";
 import ConferentePage from "./pages/ConferentePage";
+import LiderPage from "./pages/LiderPage";
 import FiscalPage from "./pages/FiscalPage";
 import NotFound from "./pages/NotFound";
 
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/separador" element={<ProtectedRoute allowedRole="separador"><SeparadorPage /></ProtectedRoute>} />
             <Route path="/meus-embarques" element={<ProtectedRoute><MeusEmbarquesPage /></ProtectedRoute>} />
             <Route path="/conferente" element={<ProtectedRoute allowedRole="conferente"><ConferentePage /></ProtectedRoute>} />
+            <Route path="/lider" element={<ProtectedRoute allowedRole="lider"><LiderPage /></ProtectedRoute>} />
             <Route path="/fiscal" element={<ProtectedRoute allowedRole="fiscal"><FiscalPage /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>

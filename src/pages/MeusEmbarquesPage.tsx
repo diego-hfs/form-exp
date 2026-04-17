@@ -13,6 +13,7 @@ import EmbarqueDetalhesDialog from '@/components/EmbarqueDetalhesDialog';
 
 function getEtapa(c: Conferencia) {
   if (c.status === 'aprovado' || c.status === 'bloqueado') return 'Fiscal';
+  if (c.status === 'liberado_lider' || c.status === 'bloqueado_lider') return 'Líder';
   if (c.status === 'conferido' || c.status === 'divergente') return 'Conferência';
   return 'Separação';
 }
@@ -30,6 +31,7 @@ function getStatusVariant(c: Conferencia): 'default' | 'secondary' | 'destructiv
 
 function getEtapaVariant(c: Conferencia): 'default' | 'secondary' | 'destructive' | 'outline' {
   if (c.status === 'aprovado' || c.status === 'bloqueado') return 'outline';
+  if (c.status === 'liberado_lider' || c.status === 'bloqueado_lider') return 'secondary';
   if (c.status === 'conferido' || c.status === 'divergente') return 'secondary';
   return 'default';
 }
@@ -54,7 +56,7 @@ export default function MeusEmbarquesPage() {
   }, [embarques, busca]);
 
   const backRoute = `/${perfil}`;
-  const perfilLabel = perfil === 'conferente' ? 'Conferente' : perfil === 'fiscal' ? 'Fiscal' : 'Separador';
+  const perfilLabel = perfil === 'conferente' ? 'Conferente' : perfil === 'fiscal' ? 'Fiscal' : perfil === 'lider' ? 'Líder' : 'Separador';
 
   const load = async (silent = false) => {
     if (!silent) setLoading(true);
@@ -139,6 +141,10 @@ export default function MeusEmbarquesPage() {
                   <div>
                     <span className="text-muted-foreground">Conferência:</span>
                     <p className="font-medium">{formatDate(emb.dataConferencia)}</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Líder:</span>
+                    <p className="font-medium">{formatDate(emb.dataLider)}</p>
                   </div>
                   <div>
                     <span className="text-muted-foreground">Fiscal:</span>

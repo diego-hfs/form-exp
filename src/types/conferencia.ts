@@ -1,9 +1,11 @@
-export type Perfil = 'separador' | 'conferente' | 'fiscal';
+export type Perfil = 'separador' | 'conferente' | 'lider' | 'fiscal';
 
 export type StatusConferencia = 
   | 'aguardando_conferencia' 
   | 'conferido' 
   | 'divergente' 
+  | 'liberado_lider'
+  | 'bloqueado_lider'
   | 'aprovado' 
   | 'bloqueado';
 
@@ -39,12 +41,15 @@ export interface Conferencia {
   placaVeiculo?: string;
   separador: string;
   conferente?: string;
+  lider?: string;
   fiscal?: string;
   status: StatusConferencia;
   itensSeparacao: ItemSeparacao[];
   itensConferencia: ItemConferencia[];
   dataSeparacao: string;
   dataConferencia?: string;
+  dataLider?: string;
   dataFiscal?: string;
+  decisaoLider?: 'liberado_lider' | 'bloqueado_lider';
   decisaoFiscal?: 'aprovado' | 'bloqueado';
 }

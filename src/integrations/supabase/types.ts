@@ -20,10 +20,13 @@ export type Database = {
           created_at: string
           data_conferencia: string | null
           data_fiscal: string | null
+          data_lider: string | null
           data_separacao: string
           decisao_fiscal: string | null
+          decisao_lider: string | null
           fiscal: string | null
           id: string
+          lider: string | null
           numero_embarque: string
           placa_veiculo: string | null
           separador: string
@@ -35,10 +38,13 @@ export type Database = {
           created_at?: string
           data_conferencia?: string | null
           data_fiscal?: string | null
+          data_lider?: string | null
           data_separacao?: string
           decisao_fiscal?: string | null
+          decisao_lider?: string | null
           fiscal?: string | null
           id?: string
+          lider?: string | null
           numero_embarque: string
           placa_veiculo?: string | null
           separador: string
@@ -50,10 +56,13 @@ export type Database = {
           created_at?: string
           data_conferencia?: string | null
           data_fiscal?: string | null
+          data_lider?: string | null
           data_separacao?: string
           decisao_fiscal?: string | null
+          decisao_lider?: string | null
           fiscal?: string | null
           id?: string
+          lider?: string | null
           numero_embarque?: string
           placa_veiculo?: string | null
           separador?: string
@@ -228,7 +237,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "separador" | "conferente" | "fiscal"
+      app_role: "separador" | "conferente" | "fiscal" | "lider"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -356,7 +365,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["separador", "conferente", "fiscal"],
+      app_role: ["separador", "conferente", "fiscal", "lider"],
     },
   },
 } as const
