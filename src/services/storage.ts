@@ -216,7 +216,7 @@ export async function getEmbarquesParaFiscal(): Promise<Conferencia[]> {
   const { data: rows } = await supabase
     .from('conferencias')
     .select('*')
-    .in('status', ['liberado_lider', 'bloqueado_lider'])
+    .in('status', ['liberado_lider', 'bloqueado_lider', 'aprovado', 'bloqueado'])
     .order('created_at', { ascending: false });
 
   if (!rows || rows.length === 0) return [];
