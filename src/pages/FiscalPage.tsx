@@ -135,15 +135,17 @@ export default function FiscalPage() {
 
         <Card className="mb-4">
           <CardContent className="pt-6">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 text-sm">
               <div><span className="text-muted-foreground">Embarque:</span><p className="font-semibold">{conferencia.numeroEmbarque}</p></div>
               <div><span className="text-muted-foreground">Separador:</span><p className="font-semibold">{conferencia.separador}</p></div>
-              <div><span className="text-muted-foreground">Conferente:</span><p className="font-semibold">{conferencia.conferente}</p></div>
+              <div><span className="text-muted-foreground">Conferente:</span><p className="font-semibold">{conferencia.conferente || '-'}</p></div>
+              <div><span className="text-muted-foreground">Líder:</span><p className="font-semibold">{conferencia.lider || '-'}</p></div>
               <div><span className="text-muted-foreground">Status:</span>{getStatusBadge(conferencia.status)}</div>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs text-muted-foreground mt-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs text-muted-foreground mt-4">
               <div>Separação: {formatDate(conferencia.dataSeparacao)}</div>
               <div>Conferência: {formatDate(conferencia.dataConferencia)}</div>
+              {conferencia.dataLider && <div>Líder: {formatDate(conferencia.dataLider)}</div>}
               {conferencia.dataFiscal && <div>Fiscal: {formatDate(conferencia.dataFiscal)}</div>}
             </div>
           </CardContent>
@@ -356,7 +358,7 @@ export default function FiscalPage() {
                   <div className="flex-1">
                     <p className="font-semibold text-base">{emb.numeroEmbarque}</p>
                     <p className="text-xs text-muted-foreground">
-                      Placa: {emb.placaVeiculo || '-'} • Separador: {emb.separador} • Conferente: {emb.conferente || '-'} • {new Date(emb.dataSeparacao).toLocaleDateString('pt-BR')}
+                      Placa: {emb.placaVeiculo || '-'} • Separador: {emb.separador} • Conferente: {emb.conferente || '-'} • Líder: {emb.lider || '-'} • {new Date(emb.dataSeparacao).toLocaleDateString('pt-BR')}
                     </p>
                   </div>
                   <div className="flex gap-2 items-center">
