@@ -216,7 +216,7 @@ export async function getEmbarquesParaFiscal(): Promise<Conferencia[]> {
   const { data: rows } = await supabase
     .from('conferencias')
     .select('*')
-    .in('status', ['liberado_lider', 'bloqueado_lider'])
+    .in('status', ['liberado_lider', 'bloqueado_lider', 'aprovado', 'bloqueado'])
     .order('created_at', { ascending: false });
 
   if (!rows || rows.length === 0) return [];
@@ -303,4 +303,35 @@ export async function reabrirConferencia(conferenciaId: string): Promise<void> {
     .eq('id', conferenciaId);
 
   if (error) throw new Error(error.message);
+}
+
+// Fiscal devolve embarque para análise do Líder (mantém itens conferidos)
+export async function reabrirParaLider(conferenciaId: string): Promise<void> {
+  // Determina status alvo (conferido ou divergente) com base nos itens
+  const { data: itens } = await supabase
+    .from('itens_conferencia')
+    .select('status')
+    .eq('conferencia_id', conferenciaId);
+
+  const temDivergente = (itens || []).some(i => i.status === 'divergente');
+  const novoStatus = temDivergente ? 'divergente' : 'conferido';
+
+  const { data, error } = await supabase
+    .from('conferencias')
+    .update({
+      status: novoStatus,
+      lider: null,
+      fiscal: null,
+      data_lider: null,
+      data_fiscal: null,
+      decisao_lider: null,
+      decisao_fiscal: null,
+    } as any)
+    .eq('id', conferenciaId)
+    .select();
+
+  if (error) throw new Error(error.message);
+  if (!data || data.length === 0) {
+    throw new Error('Você não tem permissão para reabrir este embarque ou o status mudou. Recarregue a página.');
+  }
 }
