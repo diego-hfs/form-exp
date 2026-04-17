@@ -210,13 +210,16 @@ export default function FiscalPage() {
         </Card>
 
         {!isFinalizado && (
-          <div className="grid grid-cols-2 gap-4">
-            <Button className="h-16 text-lg font-semibold bg-success hover:bg-success/90 text-success-foreground" onClick={() => handleDecisao('aprovado')} disabled={loading}>
-              <ShieldCheck className="w-6 h-6 mr-2" /> Aprovar Expedição
-            </Button>
-            <Button variant="destructive" className="h-16 text-lg font-semibold" onClick={() => handleDecisao('bloqueado')} disabled={loading}>
-              <ShieldX className="w-6 h-6 mr-2" /> Finalizar Expedição
-            </Button>
+          <div className="grid grid-cols-1 gap-4">
+            {hasDivergencia ? (
+              <Button variant="destructive" className="h-16 text-lg font-semibold" onClick={() => handleDecisao('bloqueado')} disabled={loading}>
+                <ShieldX className="w-6 h-6 mr-2" /> Finalizar Expedição com Divergência
+              </Button>
+            ) : (
+              <Button className="h-16 text-lg font-semibold bg-success hover:bg-success/90 text-success-foreground" onClick={() => handleDecisao('aprovado')} disabled={loading}>
+                <ShieldCheck className="w-6 h-6 mr-2" /> Aprovar Expedição
+              </Button>
+            )}
           </div>
         )}
 
