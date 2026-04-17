@@ -46,7 +46,7 @@ export default function EmbarqueDetalhesDialog({ embarque, open, onOpenChange, o
   const [reabrindo, setReabrindo] = useState(false);
   if (!embarque) return null;
   const temConferencia = embarque.itensConferencia && embarque.itensConferencia.length > 0;
-  const podeReabrir = perfil === 'fiscal' && ['conferido', 'divergente', 'aprovado', 'bloqueado'].includes(embarque.status);
+  const podeReabrir = (perfil === 'fiscal' || perfil === 'lider') && ['conferido', 'divergente', 'liberado_lider', 'bloqueado_lider', 'aprovado', 'bloqueado'].includes(embarque.status);
 
   const handleReabrir = async () => {
     setReabrindo(true);

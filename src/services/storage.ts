@@ -9,11 +9,14 @@ function mapConferencia(row: any, itensSep: any[], itensConf: any[]): Conferenci
     placaVeiculo: row.placa_veiculo ?? undefined,
     separador: row.separador,
     conferente: row.conferente ?? undefined,
+    lider: row.lider ?? undefined,
     fiscal: row.fiscal ?? undefined,
     status: row.status,
+    decisaoLider: row.decisao_lider ?? undefined,
     decisaoFiscal: row.decisao_fiscal ?? undefined,
     dataSeparacao: row.data_separacao,
     dataConferencia: row.data_conferencia ?? undefined,
+    dataLider: row.data_lider ?? undefined,
     dataFiscal: row.data_fiscal ?? undefined,
     itensSeparacao: itensSep.map(i => ({
       id: i.id,
@@ -129,8 +132,17 @@ export async function saveConferenciaConferente(
   if (err2) throw new Error(err2.message);
 }
 
-export async function getConferenciasPorUsuario(nome: string, role: 'separador' | 'conferente' | 'fiscal'): Promise<Conferencia[]> {
-  const column = role === 'conferente' ? 'conferente' : role === 'fiscal' ? 'fiscal' : 'separador';
+export async function getConferenciasPorUsuario(
+  nome: string,
+  role: 'separador' | 'conferente' | 'lider' | 'fiscal'
+): Promise<Conferencia[]> {
+  const column = role === 'conferente'
+    ? 'conferente'
+    : role === 'fiscal'
+      ? 'fiscal'
+      : role === 'lider'
+        ? 'lider'
+        : 'separador';
   const { data: rows } = await supabase
     .from('conferencias')
     .select('*')
@@ -174,7 +186,7 @@ export async function getEmbarquesParaConferente(): Promise<Conferencia[]> {
   ));
 }
 
-export async function getEmbarquesParaFiscal(): Promise<Conferencia[]> {
+export async function getEmbarquesParaLider(): Promise<Conferencia[]> {
   const { data: rows } = await supabase
     .from('conferencias')
     .select('*')
@@ -194,6 +206,46 @@ export async function getEmbarquesParaFiscal(): Promise<Conferencia[]> {
     (itensSep || []).filter(i => i.conferencia_id === r.id),
     (itensConf || []).filter(i => i.conferencia_id === r.id),
   ));
+}
+
+export async function getEmbarquesParaFiscal(): Promise<Conferencia[]> {
+  const { data: rows } = await supabase
+    .from('conferencias')
+    .select('*')
+    .in('status', ['liberado_lider', 'bloqueado_lider'])
+    .order('created_at', { ascending: false });
+
+  if (!rows || rows.length === 0) return [];
+
+  const ids = rows.map(r => r.id);
+  const [{ data: itensSep }, { data: itensConf }] = await Promise.all([
+    supabase.from('itens_separacao').select('*').in('conferencia_id', ids),
+    supabase.from('itens_conferencia').select('*').in('conferencia_id', ids),
+  ]);
+
+  return rows.map(r => mapConferencia(
+    r,
+    (itensSep || []).filter(i => i.conferencia_id === r.id),
+    (itensConf || []).filter(i => i.conferencia_id === r.id),
+  ));
+}
+
+export async function saveDecisaoLider(
+  conferenciaId: string,
+  lider: string,
+  decisao: 'liberado_lider' | 'bloqueado_lider'
+): Promise<void> {
+  const { error } = await supabase
+    .from('conferencias')
+    .update({
+      lider,
+      status: decisao,
+      decisao_lider: decisao,
+      data_lider: new Date().toISOString(),
+    } as any)
+    .eq('id', conferenciaId);
+
+  if (error) throw new Error(error.message);
 }
 
 export async function saveDecisaoFiscal(
@@ -222,17 +274,20 @@ export async function reabrirConferencia(conferenciaId: string): Promise<void> {
     .eq('conferencia_id', conferenciaId);
   if (errDel) throw new Error(errDel.message);
 
-  // Reverte status para aguardando_conferencia, limpa dados de conferente/fiscal
+  // Reverte status para aguardando_conferencia, limpa dados de conferente/lider/fiscal
   const { error } = await supabase
     .from('conferencias')
     .update({
       status: 'aguardando_conferencia',
       conferente: null,
+      lider: null,
       fiscal: null,
       data_conferencia: null,
+      data_lider: null,
       data_fiscal: null,
+      decisao_lider: null,
       decisao_fiscal: null,
-    })
+    } as any)
     .eq('id', conferenciaId);
 
   if (error) throw new Error(error.message);
