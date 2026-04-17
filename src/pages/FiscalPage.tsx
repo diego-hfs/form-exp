@@ -215,7 +215,7 @@ export default function FiscalPage() {
               <ShieldCheck className="w-6 h-6 mr-2" /> Aprovar Expedição
             </Button>
             <Button variant="destructive" className="h-16 text-lg font-semibold" onClick={() => handleDecisao('bloqueado')} disabled={loading}>
-              <ShieldX className="w-6 h-6 mr-2" /> Finalizar Expedição Com Divergência
+              <ShieldX className="w-6 h-6 mr-2" /> Finalizar Expedição
             </Button>
           </div>
         )}
