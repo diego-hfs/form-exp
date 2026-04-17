@@ -160,10 +160,34 @@ export default function EmbarqueDetalhesDialog({ embarque, open, onOpenChange, o
           </div>
 
           {embarque.status === 'bloqueado' && (
-            <p className="text-destructive text-sm font-medium mt-4">⚠ Bloqueado pelo fiscal</p>
+            <p className="text-destructive text-sm font-medium mt-4">⚠ Finalizado com divergência pelo fiscal</p>
           )}
           {embarque.status === 'divergente' && (
-            <p className="text-orange-600 text-sm font-medium mt-4">⚠ Divergência encontrada na conferência</p>
+            <p className="text-warning text-sm font-medium mt-4">⚠ Divergência encontrada na conferência</p>
+          )}
+
+          {podeReabrir && (
+            <div className="mt-4 pt-4 border-t">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" className="w-full border-warning text-warning hover:bg-warning/10" disabled={reabrindo}>
+                    <RotateCcw className="w-4 h-4 mr-2" /> Reabrir Conferência
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Reabrir conferência?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      O embarque <strong>{embarque.numeroEmbarque}</strong> voltará para a etapa de <strong>Conferência</strong>. Os dados conferidos anteriormente serão apagados e o Conferente precisará refazer a conferência.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleReabrir}>Sim, reabrir</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           )}
         </ScrollArea>
       </DialogContent>
