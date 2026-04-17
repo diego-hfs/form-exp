@@ -103,16 +103,20 @@ export async function saveConferenciaConferente(
   itensConf: Omit<ItemConferencia, 'id'>[],
   status: 'conferido' | 'divergente'
 ): Promise<void> {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('conferencias')
     .update({
       conferente,
       status,
       data_conferencia: new Date().toISOString(),
     })
-    .eq('id', conferenciaId);
+    .eq('id', conferenciaId)
+    .select();
 
   if (error) throw new Error(error.message);
+  if (!data || data.length === 0) {
+    throw new Error('Você não tem permissão para finalizar esta conferência ou o status mudou. Recarregue a página.');
+  }
 
   const itensDb = itensConf.map(i => ({
     conferencia_id: conferenciaId,
