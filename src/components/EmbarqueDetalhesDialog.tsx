@@ -41,9 +41,27 @@ function getStatusBadge(status: string) {
   return <Badge variant="secondary">{status.replace('_', ' ').toUpperCase()}</Badge>;
 }
 
-export default function EmbarqueDetalhesDialog({ embarque, open, onOpenChange }: Props) {
+export default function EmbarqueDetalhesDialog({ embarque, open, onOpenChange, onReaberto }: Props) {
+  const { perfil } = useAuth();
+  const [reabrindo, setReabrindo] = useState(false);
   if (!embarque) return null;
   const temConferencia = embarque.itensConferencia && embarque.itensConferencia.length > 0;
+  const podeReabrir = perfil === 'fiscal' && (embarque.status === 'divergente' || embarque.status === 'bloqueado');
+
+  const handleReabrir = async () => {
+    setReabrindo(true);
+    try {
+      await reabrirConferencia(embarque.id);
+      toast.success('Conferência reaberta! Tarefa devolvida ao Conferente.');
+      onOpenChange(false);
+      onReaberto?.();
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao reabrir conferência.');
+    } finally {
+      setReabrindo(false);
+    }
+  };
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
