@@ -272,19 +272,19 @@ export default function FiscalPage() {
           </Card>
         )}
 
-        {(conferencia.status === 'conferido' || conferencia.status === 'divergente' || conferencia.status === 'aprovado' || conferencia.status === 'bloqueado') && (
+        {(conferencia.status === 'liberado_lider' || conferencia.status === 'bloqueado_lider' || conferencia.status === 'aprovado' || conferencia.status === 'bloqueado') && (
           <div className="mt-4">
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="outline" className="w-full h-14 text-base font-semibold border-warning text-warning hover:bg-warning/10" disabled={loading}>
-                  <RotateCcw className="w-5 h-5 mr-2" /> Reabrir Conferência
+                  <RotateCcw className="w-5 h-5 mr-2" /> Reabrir e devolver ao Líder
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Reabrir conferência?</AlertDialogTitle>
+                  <AlertDialogTitle>Reabrir embarque?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Esta ação devolve o embarque <strong>{conferencia.numeroEmbarque}</strong> para a etapa de <strong>Conferência</strong>. Os dados conferidos anteriormente serão apagados e o Conferente precisará refazer a conferência. Deseja continuar?
+                    Esta ação devolve o embarque <strong>{conferencia.numeroEmbarque}</strong> para a etapa de análise do <strong>Líder</strong>. A decisão do Líder e do Fiscal serão apagadas, mas os itens conferidos serão mantidos. Deseja continuar?
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
