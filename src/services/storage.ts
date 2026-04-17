@@ -213,3 +213,27 @@ export async function saveDecisaoFiscal(
 
   if (error) throw new Error(error.message);
 }
+
+export async function reabrirConferencia(conferenciaId: string): Promise<void> {
+  // Apaga itens de conferência anteriores
+  const { error: errDel } = await supabase
+    .from('itens_conferencia')
+    .delete()
+    .eq('conferencia_id', conferenciaId);
+  if (errDel) throw new Error(errDel.message);
+
+  // Reverte status para aguardando_conferencia, limpa dados de conferente/fiscal
+  const { error } = await supabase
+    .from('conferencias')
+    .update({
+      status: 'aguardando_conferencia',
+      conferente: null,
+      fiscal: null,
+      data_conferencia: null,
+      data_fiscal: null,
+      decisao_fiscal: null,
+    })
+    .eq('id', conferenciaId);
+
+  if (error) throw new Error(error.message);
+}
