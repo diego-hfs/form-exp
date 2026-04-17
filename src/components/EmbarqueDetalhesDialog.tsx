@@ -7,7 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { RotateCcw } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { reabrirConferencia } from '@/services/storage';
+import { reabrirConferencia, reabrirParaLider } from '@/services/storage';
 import { toast } from 'sonner';
 import type { Conferencia } from '@/types/conferencia';
 
@@ -46,9 +46,14 @@ export default function EmbarqueDetalhesDialog({ embarque, open, onOpenChange, o
   const [reabrindo, setReabrindo] = useState(false);
   if (!embarque) return null;
   const temConferencia = embarque.itensConferencia && embarque.itensConferencia.length > 0;
-  const podeReabrir = (perfil === 'fiscal' || perfil === 'lider') && ['conferido', 'divergente', 'liberado_lider', 'bloqueado_lider', 'aprovado', 'bloqueado'].includes(embarque.status);
+  const isFinalizado = embarque.status === 'aprovado' || embarque.status === 'bloqueado';
+  const isPosConferencia = ['conferido', 'divergente', 'liberado_lider', 'bloqueado_lider'].includes(embarque.status);
+  // Fiscal/Líder podem reabrir embarques finalizados devolvendo ao Líder
+  const podeReabrirParaLider = (perfil === 'fiscal' || perfil === 'lider') && isFinalizado;
+  // Reabertura completa (volta ao conferente) disponível apenas em estágios intermediários
+  const podeReabrirParaConferente = (perfil === 'fiscal' || perfil === 'lider') && isPosConferencia;
 
-  const handleReabrir = async () => {
+  const handleReabrirConferente = async () => {
     setReabrindo(true);
     try {
       await reabrirConferencia(embarque.id);
@@ -57,6 +62,20 @@ export default function EmbarqueDetalhesDialog({ embarque, open, onOpenChange, o
       onReaberto?.();
     } catch (err: any) {
       toast.error(err.message || 'Erro ao reabrir conferência.');
+    } finally {
+      setReabrindo(false);
+    }
+  };
+
+  const handleReabrirLider = async () => {
+    setReabrindo(true);
+    try {
+      await reabrirParaLider(embarque.id);
+      toast.success('Embarque reaberto! Tarefa devolvida ao Líder.');
+      onOpenChange(false);
+      onReaberto?.();
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao reabrir embarque.');
     } finally {
       setReabrindo(false);
     }
@@ -166,27 +185,50 @@ export default function EmbarqueDetalhesDialog({ embarque, open, onOpenChange, o
             <p className="text-warning text-sm font-medium mt-4">⚠ Divergência encontrada na conferência</p>
           )}
 
-          {podeReabrir && (
-            <div className="mt-4 pt-4 border-t">
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="outline" className="w-full border-warning text-warning hover:bg-warning/10" disabled={reabrindo}>
-                    <RotateCcw className="w-4 h-4 mr-2" /> Reabrir Conferência
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Reabrir conferência?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      O embarque <strong>{embarque.numeroEmbarque}</strong> voltará para a etapa de <strong>Conferência</strong>. Os dados conferidos anteriormente serão apagados e o Conferente precisará refazer a conferência.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleReabrir}>Sim, reabrir</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+          {(podeReabrirParaLider || podeReabrirParaConferente) && (
+            <div className="mt-4 pt-4 border-t space-y-2">
+              {podeReabrirParaLider && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="outline" className="w-full border-warning text-warning hover:bg-warning/10" disabled={reabrindo}>
+                      <RotateCcw className="w-4 h-4 mr-2" /> Reabrir e devolver ao Líder
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Reabrir embarque?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Esta ação devolve o embarque <strong>{embarque.numeroEmbarque}</strong> para a etapa de análise do <strong>Líder</strong>. A decisão do Líder e do Fiscal serão apagadas, mas os itens conferidos serão mantidos. Deseja continuar?
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleReabrirLider}>Sim, reabrir</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+              {podeReabrirParaConferente && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="outline" className="w-full border-warning text-warning hover:bg-warning/10" disabled={reabrindo}>
+                      <RotateCcw className="w-4 h-4 mr-2" /> Reabrir Conferência
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Reabrir conferência?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        O embarque <strong>{embarque.numeroEmbarque}</strong> voltará para a etapa de <strong>Conferência</strong>. Os dados conferidos anteriormente serão apagados e o Conferente precisará refazer a conferência.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleReabrirConferente}>Sim, reabrir</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
             </div>
           )}
         </ScrollArea>

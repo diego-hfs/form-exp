@@ -331,48 +331,6 @@ export default function FiscalPage() {
         </CardContent>
       </Card>
 
-      {/* Embarques list */}
-      <Card>
-        <CardHeader><CardTitle className="text-lg">Embarques Disponíveis</CardTitle></CardHeader>
-        <CardContent>
-          {loadingList ? (
-            <p className="text-center text-muted-foreground py-4">Carregando...</p>
-          ) : embarques.length === 0 ? (
-            <div className="text-center py-6 text-muted-foreground">
-              <Package className="w-12 h-12 mx-auto mb-2 opacity-50" />
-              Nenhum embarque disponível para validação.
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {embarques
-                .filter(emb => {
-                  const q = embarque.trim().toLowerCase();
-                  return emb.numeroEmbarque.toLowerCase().includes(q) || (emb.placaVeiculo || '').toLowerCase().includes(q);
-                })
-                .map(emb => (
-                <div
-                  key={emb.id}
-                  onClick={() => selecionarEmbarque(emb)}
-                  className="flex items-center justify-between p-3 rounded-lg border cursor-pointer hover:bg-accent/50 transition-colors"
-                >
-                  <div className="flex-1">
-                    <p className="font-semibold text-base">{emb.numeroEmbarque}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Placa: {emb.placaVeiculo || '-'} • Separador: {emb.separador} • Conferente: {emb.conferente || '-'} • Líder: {emb.lider || '-'} • {new Date(emb.dataSeparacao).toLocaleDateString('pt-BR')}
-                    </p>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <Badge variant={emb.status === 'aprovado' || emb.status === 'bloqueado' ? 'outline' : 'secondary'}>
-                      {getEtapaLabel(emb)}
-                    </Badge>
-                    {getStatusBadge(emb.status)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
     </div>
   );
 }
