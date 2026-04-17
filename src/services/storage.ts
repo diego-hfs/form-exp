@@ -235,7 +235,7 @@ export async function saveDecisaoLider(
   lider: string,
   decisao: 'liberado_lider' | 'bloqueado_lider'
 ): Promise<void> {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('conferencias')
     .update({
       lider,
@@ -243,9 +243,13 @@ export async function saveDecisaoLider(
       decisao_lider: decisao,
       data_lider: new Date().toISOString(),
     } as any)
-    .eq('id', conferenciaId);
+    .eq('id', conferenciaId)
+    .select();
 
   if (error) throw new Error(error.message);
+  if (!data || data.length === 0) {
+    throw new Error('Você não tem permissão para alterar este embarque ou o status mudou. Recarregue a página.');
+  }
 }
 
 export async function saveDecisaoFiscal(
