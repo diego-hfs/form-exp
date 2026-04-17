@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { getConferenciaPorEmbarque, getEmbarquesParaFiscal, saveDecisaoFiscal, reabrirConferencia } from '@/services/storage';
+import { getConferenciaPorEmbarque, getEmbarquesParaFiscal, saveDecisaoFiscal, reabrirParaLider } from '@/services/storage';
 import type { Conferencia } from '@/types/conferencia';
 import { ArrowLeft, Search, ShieldCheck, ShieldX, AlertTriangle, ClipboardList, LogOut, Package, ChevronLeft, RotateCcw } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -98,12 +98,12 @@ export default function FiscalPage() {
     if (!conferencia) return;
     setLoading(true);
     try {
-      await reabrirConferencia(conferencia.id);
-      toast.success('Conferência reaberta! Tarefa devolvida ao Conferente.');
+      await reabrirParaLider(conferencia.id);
+      toast.success('Embarque reaberto! Tarefa devolvida ao Líder.');
       setConferencia(null);
       loadEmbarques();
     } catch (err: any) {
-      toast.error(err.message || 'Erro ao reabrir conferência.');
+      toast.error(err.message || 'Erro ao reabrir embarque.');
     } finally {
       setLoading(false);
     }
