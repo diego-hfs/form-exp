@@ -83,13 +83,19 @@ export default function LiderPage() {
 
   const handleDecisao = async (decisao: 'liberado_lider' | 'bloqueado_lider') => {
     if (!conferencia) return;
+    if (!nome) {
+      toast.error('Sessão inválida. Faça login novamente.');
+      return;
+    }
     setLoading(true);
     try {
+      console.log('[Lider] Salvando decisão:', { conferenciaId: conferencia.id, lider: nome, decisao, statusAtual: conferencia.status });
       await saveDecisaoLider(conferencia.id, nome, decisao);
       toast.success(decisao === 'liberado_lider' ? 'Embarque liberado! Encaminhado ao Fiscal.' : 'Embarque finalizado com divergência! Encaminhado ao Fiscal.');
       setConferencia(null);
       loadEmbarques();
     } catch (err: any) {
+      console.error('[Lider] Erro ao salvar decisão:', err);
       toast.error(err.message || 'Erro ao salvar decisão.');
     } finally {
       setLoading(false);
