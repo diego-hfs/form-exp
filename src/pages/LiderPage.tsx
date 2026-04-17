@@ -220,13 +220,45 @@ export default function LiderPage() {
         {!isAnalisado && (
           <div className="grid grid-cols-1 gap-4">
             {hasDivergencia ? (
-              <Button variant="destructive" className="h-16 text-lg font-semibold" onClick={() => handleDecisao('bloqueado_lider')} disabled={loading}>
-                <ShieldX className="w-6 h-6 mr-2" /> Finalizar Expedição com Divergência
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" className="h-16 text-lg font-semibold" disabled={loading}>
+                    <ShieldX className="w-6 h-6 mr-2" /> Finalizar Expedição com Divergência
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Finalizar embarque com divergência?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Você está prestes a finalizar o embarque <strong>{conferencia.numeroEmbarque}</strong> com <strong>divergências</strong>. Esta ação será registrada e encaminhada ao Fiscal. Deseja continuar?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleDecisao('bloqueado_lider')}>Sim, finalizar com divergência</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             ) : (
-              <Button className="h-16 text-lg font-semibold bg-success hover:bg-success/90 text-success-foreground" onClick={() => handleDecisao('liberado_lider')} disabled={loading}>
-                <ShieldCheck className="w-6 h-6 mr-2" /> Liberar Embarque
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button className="h-16 text-lg font-semibold bg-success hover:bg-success/90 text-success-foreground" disabled={loading}>
+                    <ShieldCheck className="w-6 h-6 mr-2" /> Liberar Embarque
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Liberar embarque?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Você está prestes a liberar o embarque <strong>{conferencia.numeroEmbarque}</strong> e encaminhá-lo ao Fiscal. Deseja continuar?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleDecisao('liberado_lider')}>Sim, liberar</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
           </div>
         )}

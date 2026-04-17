@@ -212,13 +212,45 @@ export default function FiscalPage() {
         {!isFinalizado && (
           <div className="grid grid-cols-1 gap-4">
             {hasDivergencia ? (
-              <Button variant="destructive" className="h-16 text-lg font-semibold" onClick={() => handleDecisao('bloqueado')} disabled={loading}>
-                <ShieldX className="w-6 h-6 mr-2" /> Finalizar Expedição com Divergência
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" className="h-16 text-lg font-semibold" disabled={loading}>
+                    <ShieldX className="w-6 h-6 mr-2" /> Finalizar Expedição com Divergência
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Finalizar expedição com divergência?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Você está prestes a finalizar a expedição do embarque <strong>{conferencia.numeroEmbarque}</strong> com <strong>divergências</strong>. Esta decisão é final e será registrada. Deseja continuar?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleDecisao('bloqueado')}>Sim, finalizar com divergência</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             ) : (
-              <Button className="h-16 text-lg font-semibold bg-success hover:bg-success/90 text-success-foreground" onClick={() => handleDecisao('aprovado')} disabled={loading}>
-                <ShieldCheck className="w-6 h-6 mr-2" /> Aprovar Expedição
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button className="h-16 text-lg font-semibold bg-success hover:bg-success/90 text-success-foreground" disabled={loading}>
+                    <ShieldCheck className="w-6 h-6 mr-2" /> Aprovar Expedição
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Aprovar expedição?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Você está prestes a aprovar a expedição do embarque <strong>{conferencia.numeroEmbarque}</strong>. Esta decisão é final e será registrada. Deseja continuar?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleDecisao('aprovado')}>Sim, aprovar</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
           </div>
         )}
