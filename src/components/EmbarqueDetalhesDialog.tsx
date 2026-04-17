@@ -1,13 +1,21 @@
+import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { RotateCcw } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { reabrirConferencia } from '@/services/storage';
+import { toast } from 'sonner';
 import type { Conferencia } from '@/types/conferencia';
 
 interface Props {
   embarque: Conferencia | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onReaberto?: () => void;
 }
 
 function formatDateTime(d?: string) {
@@ -33,9 +41,27 @@ function getStatusBadge(status: string) {
   return <Badge variant="secondary">{status.replace('_', ' ').toUpperCase()}</Badge>;
 }
 
-export default function EmbarqueDetalhesDialog({ embarque, open, onOpenChange }: Props) {
+export default function EmbarqueDetalhesDialog({ embarque, open, onOpenChange, onReaberto }: Props) {
+  const { perfil } = useAuth();
+  const [reabrindo, setReabrindo] = useState(false);
   if (!embarque) return null;
   const temConferencia = embarque.itensConferencia && embarque.itensConferencia.length > 0;
+  const podeReabrir = perfil === 'fiscal' && (embarque.status === 'divergente' || embarque.status === 'bloqueado');
+
+  const handleReabrir = async () => {
+    setReabrindo(true);
+    try {
+      await reabrirConferencia(embarque.id);
+      toast.success('Conferência reaberta! Tarefa devolvida ao Conferente.');
+      onOpenChange(false);
+      onReaberto?.();
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao reabrir conferência.');
+    } finally {
+      setReabrindo(false);
+    }
+  };
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -134,10 +160,34 @@ export default function EmbarqueDetalhesDialog({ embarque, open, onOpenChange }:
           </div>
 
           {embarque.status === 'bloqueado' && (
-            <p className="text-destructive text-sm font-medium mt-4">⚠ Bloqueado pelo fiscal</p>
+            <p className="text-destructive text-sm font-medium mt-4">⚠ Finalizado com divergência pelo fiscal</p>
           )}
           {embarque.status === 'divergente' && (
-            <p className="text-orange-600 text-sm font-medium mt-4">⚠ Divergência encontrada na conferência</p>
+            <p className="text-warning text-sm font-medium mt-4">⚠ Divergência encontrada na conferência</p>
+          )}
+
+          {podeReabrir && (
+            <div className="mt-4 pt-4 border-t">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" className="w-full border-warning text-warning hover:bg-warning/10" disabled={reabrindo}>
+                    <RotateCcw className="w-4 h-4 mr-2" /> Reabrir Conferência
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Reabrir conferência?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      O embarque <strong>{embarque.numeroEmbarque}</strong> voltará para a etapa de <strong>Conferência</strong>. Os dados conferidos anteriormente serão apagados e o Conferente precisará refazer a conferência.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleReabrir}>Sim, reabrir</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           )}
         </ScrollArea>
       </DialogContent>

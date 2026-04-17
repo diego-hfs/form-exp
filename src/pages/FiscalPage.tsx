@@ -6,9 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { getConferenciaPorEmbarque, getEmbarquesParaFiscal, saveDecisaoFiscal } from '@/services/storage';
+import { getConferenciaPorEmbarque, getEmbarquesParaFiscal, saveDecisaoFiscal, reabrirConferencia } from '@/services/storage';
 import type { Conferencia } from '@/types/conferencia';
-import { ArrowLeft, Search, ShieldCheck, ShieldX, AlertTriangle, ClipboardList, LogOut, Package, ChevronLeft } from 'lucide-react';
+import { ArrowLeft, Search, ShieldCheck, ShieldX, AlertTriangle, ClipboardList, LogOut, Package, ChevronLeft, RotateCcw } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import PageHeader from '@/components/PageHeader';
 import { toast } from 'sonner';
 
@@ -83,11 +84,26 @@ export default function FiscalPage() {
     setLoading(true);
     try {
       await saveDecisaoFiscal(conferencia.id, nome, decisao);
-      toast.success(decisao === 'aprovado' ? 'Expedição aprovada!' : 'Expedição bloqueada!');
+      toast.success(decisao === 'aprovado' ? 'Expedição aprovada!' : 'Expedição finalizada com divergência!');
       setConferencia(null);
       loadEmbarques();
     } catch (err: any) {
       toast.error(err.message || 'Erro ao salvar decisão.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReabrir = async () => {
+    if (!conferencia) return;
+    setLoading(true);
+    try {
+      await reabrirConferencia(conferencia.id);
+      toast.success('Conferência reaberta! Tarefa devolvida ao Conferente.');
+      setConferencia(null);
+      loadEmbarques();
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao reabrir conferência.');
     } finally {
       setLoading(false);
     }
@@ -199,22 +215,48 @@ export default function FiscalPage() {
               <ShieldCheck className="w-6 h-6 mr-2" /> Aprovar Expedição
             </Button>
             <Button variant="destructive" className="h-16 text-lg font-semibold" onClick={() => handleDecisao('bloqueado')} disabled={loading}>
-              <ShieldX className="w-6 h-6 mr-2" /> Bloquear Expedição
+              <ShieldX className="w-6 h-6 mr-2" /> Finalizar Expedição Com Divergência
             </Button>
           </div>
         )}
 
         {isFinalizado && (
           <Card className="border-2 border-muted">
-            <CardContent className="pt-6 text-center">
-              <p className="text-lg font-semibold">
-                Decisão final: <Badge className={conferencia.status === 'aprovado' ? 'bg-success text-success-foreground' : 'bg-destructive text-destructive-foreground'}>
-                  {conferencia.status.toUpperCase()}
-                </Badge>
-              </p>
-              <p className="text-sm text-muted-foreground mt-1">Fiscal: {conferencia.fiscal} — {formatDate(conferencia.dataFiscal)}</p>
+            <CardContent className="pt-6 text-center space-y-4">
+              <div>
+                <p className="text-lg font-semibold">
+                  Decisão final: <Badge className={conferencia.status === 'aprovado' ? 'bg-success text-success-foreground' : 'bg-destructive text-destructive-foreground'}>
+                    {conferencia.status.toUpperCase()}
+                  </Badge>
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">Fiscal: {conferencia.fiscal} — {formatDate(conferencia.dataFiscal)}</p>
+              </div>
             </CardContent>
           </Card>
+        )}
+
+        {(hasDivergencia || conferencia.status === 'bloqueado') && (
+          <div className="mt-4">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" className="w-full h-14 text-base font-semibold border-warning text-warning hover:bg-warning/10" disabled={loading}>
+                  <RotateCcw className="w-5 h-5 mr-2" /> Reabrir Conferência
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Reabrir conferência?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta ação devolve o embarque <strong>{conferencia.numeroEmbarque}</strong> para a etapa de <strong>Conferência</strong>. Os dados conferidos anteriormente serão apagados e o Conferente precisará refazer a conferência. Deseja continuar?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleReabrir}>Sim, reabrir</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         )}
       </div>
     );
