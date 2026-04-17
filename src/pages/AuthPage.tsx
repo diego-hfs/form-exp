@@ -26,7 +26,10 @@ export default function AuthPage() {
 
   useEffect(() => {
     resetTabAuthorization();
-  }, [resetTabAuthorization]);
+    setNome('');
+    setEmail('');
+    setPassword('');
+  }, [resetTabAuthorization, isLogin]);
 
   const gerarEmail = (nome: string) => {
     const slug = nome.trim().toLowerCase().replace(/\s+/g, '.').replace(/[^a-z0-9.]/g, '');
