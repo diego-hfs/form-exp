@@ -103,17 +103,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let isMounted = true;
     let duplicateTabDetected = false;
 
-    const denyTabAccess = async () => {
+    const denyTabAccess = (clearSupabaseSession = true) => {
       resetTabAuthorization();
       clearLocalState();
-      // Limpa também o JWT do localStorage para evitar que requisições
-      // continuem sendo enviadas com a sessão anterior (causa de erros
-      // de RLS ao tentar inserir/atualizar registros após reload da aba).
-      try {
-        await supabase.auth.signOut({ scope: 'local' });
-      } catch {
-        // ignore
-      }
+      if (!clearSupabaseSession) return;
+      // Limpa o JWT do localStorage de forma assíncrona, sem bloquear o fluxo.
+      // Não usamos await aqui para evitar travar o callback síncrono do
+      // onAuthStateChange (recomendado pela documentação do Supabase).
+      void supabase.auth.signOut({ scope: 'local' }).catch(() => {});
     };
 
     if (channel) {
@@ -178,7 +175,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!isMounted) return;
 
       if (event === 'SIGNED_OUT') {
-        denyTabAccess();
+        // Já estamos saindo — apenas limpa o estado local sem chamar
+        // signOut novamente (evita loop de eventos SIGNED_OUT).
+        denyTabAccess(false);
         return;
       }
 
