@@ -10,12 +10,33 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { getConferenciaPorEmbarque, getEmbarquesParaConferente, saveConferenciaConferente } from '@/services/storage';
 import type { Conferencia, ItemConferencia } from '@/types/conferencia';
-import { ArrowLeft, Search, CheckCircle, XCircle, ClipboardList, LogOut, Package, ChevronLeft } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Search, CheckCircle, XCircle, ClipboardList, LogOut, Package, ChevronLeft } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { toast } from 'sonner';
 import { usePolling } from '@/hooks/usePolling';
+import { cn } from '@/lib/utils';
 
 const embalagensOptions = ['Caixa', 'Pallet', 'Saco', 'Tambor', 'Big Bag', 'Fardo', 'Engradado'];
+
+const fieldLabels: Record<string, string> = {
+  codigoProduto: 'Código do Produto',
+  descricaoProduto: 'Descrição do Produto',
+  lote: 'Lote',
+  dataFabricacao: 'Data de Fabricação',
+  dataValidade: 'Data de Validade',
+  tipoEmbalagem: 'Tipo de Embalagem',
+  quantidadePallets: 'Qtd. Pallets',
+  quantidade: 'Quantidade',
+};
+
+const isFieldEmpty = (item: Partial<ItemConferencia> | undefined, field: string): boolean => {
+  if (!item) return true;
+  const v = (item as any)[field];
+  if (field === 'quantidadePallets' || field === 'quantidade') {
+    return !v || Number(v) <= 0;
+  }
+  return !v || (typeof v === 'string' && !v.trim());
+};
 
 export default function ConferentePage() {
   const navigate = useNavigate();
@@ -27,6 +48,7 @@ export default function ConferentePage() {
   const [finalizado, setFinalizado] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingList, setLoadingList] = useState(true);
+  const [showErrors, setShowErrors] = useState(false);
 
   useEffect(() => {
     loadEmbarques();
@@ -54,6 +76,7 @@ export default function ConferentePage() {
   const abrirConferencia = (found: Conferencia) => {
     setConferencia(found);
     setFinalizado(false);
+    setShowErrors(false);
     const initial: Record<string, Partial<ItemConferencia>> = {};
     found.itensSeparacao.forEach(item => {
       initial[item.id] = {
@@ -111,14 +134,32 @@ export default function ConferentePage() {
 
   const isAllFilled = () => {
     return Object.values(conferencias).every(c =>
-      c.codigoProduto && c.descricaoProduto && c.lote && c.dataFabricacao && c.dataValidade &&
-      c.tipoEmbalagem && (c.quantidadePallets ?? 0) > 0 && (c.quantidade ?? 0) > 0
+      Object.keys(fieldLabels).every(f => !isFieldEmpty(c, f))
     );
   };
 
+  const getPendencias = (): string[] => {
+    if (!conferencia) return [];
+    const lista: string[] = [];
+    conferencia.itensSeparacao.forEach((sep, idx) => {
+      const conf = conferencias[sep.id];
+      Object.entries(fieldLabels).forEach(([field, label]) => {
+        if (isFieldEmpty(conf, field)) {
+          lista.push(`Item ${idx + 1}: ${label}`);
+        }
+      });
+    });
+    return lista;
+  };
+
   const handleFinalizar = async () => {
-    if (!conferencia || !isAllFilled()) {
-      toast.error('Preencha todos os campos de conferência.');
+    if (!conferencia) return;
+    if (!isAllFilled()) {
+      setShowErrors(true);
+      const pendencias = getPendencias();
+      toast.error(`Faltam ${pendencias.length} campo(s) obrigatório(s).`, {
+        description: pendencias.slice(0, 3).join(' • ') + (pendencias.length > 3 ? ` e mais ${pendencias.length - 3}...` : ''),
+      });
       return;
     }
     setLoading(true);
@@ -149,6 +190,7 @@ export default function ConferentePage() {
       const updated = await getConferenciaPorEmbarque(conferencia.numeroEmbarque);
       if (updated) setConferencia(updated);
       setFinalizado(true);
+      setShowErrors(false);
       toast.success('Conferência finalizada!');
     } catch (err: any) {
       toast.error(err.message || 'Erro ao salvar conferência.');
@@ -187,6 +229,17 @@ export default function ConferentePage() {
           <CardContent className="space-y-6">
             {conferencia.itensSeparacao.map((sep, idx) => {
               const cmp = finalizado ? compareItem(sep.id) : null;
+              const conf = conferencias[sep.id];
+              const isEmpty = (f: string) => !finalizado && showErrors && isFieldEmpty(conf, f);
+              const errCls = (f: string) => cn(
+                'h-11',
+                finalizado && cmp && !cmp[f as keyof typeof cmp] && 'border-destructive border-2',
+                isEmpty(f) && 'border-destructive border-2 focus-visible:ring-destructive',
+              );
+              const labelCls = (f: string) => cn(
+                finalizado && cmp && (cmp[f as keyof typeof cmp] ? 'text-success' : 'text-destructive font-bold'),
+                isEmpty(f) && 'text-destructive font-semibold',
+              );
               return (
                 <div key={sep.id} className="border rounded-lg p-4 space-y-3 bg-muted/30">
                   <div className="flex justify-between items-center">
@@ -204,16 +257,15 @@ export default function ConferentePage() {
                       { label: 'Lote', field: 'lote' },
                     ].map(({ label, field }) => (
                       <div key={field}>
-                        <Label className={finalizado && cmp ? (cmp[field as keyof typeof cmp] ? 'text-success' : 'text-destructive font-bold') : ''}>
-                          {label} *
-                        </Label>
+                        <Label className={labelCls(field)}>{label} *</Label>
                         <Input
                           type="text"
-                          className={`h-11 ${finalizado && cmp && !cmp[field as keyof typeof cmp] ? 'border-destructive border-2' : ''}`}
+                          className={errCls(field)}
                           value={(conferencias[sep.id] as any)?.[field] || ''}
                           onChange={e => updateConf(sep.id, field, e.target.value)}
                           disabled={finalizado}
                         />
+                        {isEmpty(field) && <p className="text-xs text-destructive mt-1">Campo obrigatório</p>}
                         {finalizado && cmp && !cmp[field as keyof typeof cmp] && (
                           <p className="text-xs text-destructive mt-1">Esperado: {(sep as any)[field]}</p>
                         )}
@@ -224,35 +276,36 @@ export default function ConferentePage() {
                       { label: 'Data de Validade', field: 'dataValidade' },
                     ].map(({ label, field }) => (
                       <div key={field}>
-                        <Label className={finalizado && cmp ? (cmp[field as keyof typeof cmp] ? 'text-success' : 'text-destructive font-bold') : ''}>
-                          {label} *
-                        </Label>
+                        <Label className={labelCls(field)}>{label} *</Label>
                         <DatePickerBR
                           value={(conferencias[sep.id] as any)?.[field] || ''}
                           onChange={v => updateConf(sep.id, field, v)}
-                          className={finalizado && cmp && !cmp[field as keyof typeof cmp] ? 'border-destructive border-2' : ''}
+                          className={cn(
+                            finalizado && cmp && !cmp[field as keyof typeof cmp] && 'border-destructive border-2 rounded-md',
+                            isEmpty(field) && 'border-destructive border-2 rounded-md',
+                          )}
                         />
+                        {isEmpty(field) && <p className="text-xs text-destructive mt-1">Campo obrigatório</p>}
                         {finalizado && cmp && !cmp[field as keyof typeof cmp] && (
                           <p className="text-xs text-destructive mt-1">Esperado: {(sep as any)[field]}</p>
                         )}
                       </div>
                     ))}
                     <div>
-                      <Label className={finalizado && cmp ? (cmp.tipoEmbalagem ? 'text-success' : 'text-destructive font-bold') : ''}>
-                        Tipo de Embalagem *
-                      </Label>
+                      <Label className={labelCls('tipoEmbalagem')}>Tipo de Embalagem *</Label>
                       <Select
                         value={conferencias[sep.id]?.tipoEmbalagem || ''}
                         onValueChange={v => updateConf(sep.id, 'tipoEmbalagem', v)}
                         disabled={finalizado}
                       >
-                        <SelectTrigger className={`h-11 ${finalizado && cmp && !cmp.tipoEmbalagem ? 'border-destructive border-2' : ''}`}>
+                        <SelectTrigger className={errCls('tipoEmbalagem')}>
                           <SelectValue placeholder="Selecione" />
                         </SelectTrigger>
                         <SelectContent>
                           {embalagensOptions.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}
                         </SelectContent>
                       </Select>
+                      {isEmpty('tipoEmbalagem') && <p className="text-xs text-destructive mt-1">Campo obrigatório</p>}
                       {finalizado && cmp && !cmp.tipoEmbalagem && (
                         <p className="text-xs text-destructive mt-1">Esperado: {sep.tipoEmbalagem}</p>
                       )}
@@ -262,17 +315,16 @@ export default function ConferentePage() {
                       { label: 'Quantidade', field: 'quantidade' },
                     ].map(({ label, field }) => (
                       <div key={field}>
-                        <Label className={finalizado && cmp ? (cmp[field as keyof typeof cmp] ? 'text-success' : 'text-destructive font-bold') : ''}>
-                          {label} *
-                        </Label>
+                        <Label className={labelCls(field)}>{label} *</Label>
                         <Input
                           type="number"
                           min={0}
-                          className={`h-11 ${finalizado && cmp && !cmp[field as keyof typeof cmp] ? 'border-destructive border-2' : ''}`}
+                          className={errCls(field)}
                           value={(conferencias[sep.id] as any)?.[field] || ''}
                           onChange={e => updateConf(sep.id, field, Number(e.target.value))}
                           disabled={finalizado}
                         />
+                        {isEmpty(field) && <p className="text-xs text-destructive mt-1">Campo obrigatório (&gt; 0)</p>}
                         {finalizado && cmp && !cmp[field as keyof typeof cmp] && (
                           <p className="text-xs text-destructive mt-1">Esperado: {(sep as any)[field]}</p>
                         )}
@@ -283,8 +335,20 @@ export default function ConferentePage() {
               );
             })}
 
+            {!finalizado && showErrors && getPendencias().length > 0 && (
+              <div className="border-2 border-destructive bg-destructive/10 rounded-lg p-4">
+                <div className="flex items-center gap-2 text-destructive font-semibold mb-2">
+                  <AlertCircle className="w-5 h-5" />
+                  Existem {getPendencias().length} pendência(s):
+                </div>
+                <ul className="text-sm text-destructive space-y-1 list-disc list-inside max-h-40 overflow-y-auto">
+                  {getPendencias().map((p, i) => <li key={i}>{p}</li>)}
+                </ul>
+              </div>
+            )}
+
             {!finalizado && (
-              <Button className="w-full h-14 text-lg font-semibold" onClick={handleFinalizar} disabled={!isAllFilled() || loading}>
+              <Button className="w-full h-14 text-lg font-semibold" onClick={handleFinalizar} disabled={loading}>
                 <CheckCircle className="w-5 h-5 mr-2" /> {loading ? 'Salvando...' : 'Finalizar Conferência'}
               </Button>
             )}
