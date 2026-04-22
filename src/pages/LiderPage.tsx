@@ -12,6 +12,7 @@ import { ArrowLeft, Search, ShieldCheck, ShieldX, AlertTriangle, ClipboardList, 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import PageHeader from '@/components/PageHeader';
 import { toast } from 'sonner';
+import { usePolling } from '@/hooks/usePolling';
 
 function getStatusBadge(status: string) {
   if (status === 'liberado_lider') return <Badge className="bg-success text-success-foreground">LIBERADO LÍDER</Badge>;
@@ -39,11 +40,10 @@ export default function LiderPage() {
 
   useEffect(() => {
     loadEmbarques();
-    const interval = setInterval(() => {
-      if (!conferencia) loadEmbarques(true);
-    }, 10000);
-    return () => clearInterval(interval);
-  }, [conferencia]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  usePolling(() => loadEmbarques(true), 30000, !conferencia);
 
   const loadEmbarques = async (silent = false) => {
     if (!silent) setLoadingList(true);

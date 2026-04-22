@@ -10,6 +10,7 @@ import PageHeader from '@/components/PageHeader';
 import { getConferenciasPorUsuario } from '@/services/storage';
 import type { Conferencia } from '@/types/conferencia';
 import EmbarqueDetalhesDialog from '@/components/EmbarqueDetalhesDialog';
+import { usePolling } from '@/hooks/usePolling';
 
 function getEtapa(c: Conferencia) {
   if (c.status === 'aprovado' || c.status === 'bloqueado') return 'Fiscal';
