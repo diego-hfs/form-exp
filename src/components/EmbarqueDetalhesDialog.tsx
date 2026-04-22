@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { RotateCcw } from 'lucide-react';
+import { RotateCcw, Download, Printer } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { reabrirConferencia, reabrirParaLider } from '@/services/storage';
+import { gerarEmbarquePdf } from '@/lib/embarquePdf';
 import { toast } from 'sonner';
 import type { Conferencia } from '@/types/conferencia';
 
@@ -92,6 +93,14 @@ export default function EmbarqueDetalhesDialog({ embarque, open, onOpenChange, o
               <DialogDescription>Placa: {embarque.placaVeiculo || '-'}</DialogDescription>
             </div>
             {getStatusBadge(embarque.status)}
+          </div>
+          <div className="flex flex-wrap gap-2 pt-2">
+            <Button size="sm" variant="outline" onClick={() => gerarEmbarquePdf(embarque, 'download')}>
+              <Download className="w-4 h-4 mr-2" /> Baixar PDF
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => gerarEmbarquePdf(embarque, 'print')}>
+              <Printer className="w-4 h-4 mr-2" /> Imprimir
+            </Button>
           </div>
         </DialogHeader>
 
