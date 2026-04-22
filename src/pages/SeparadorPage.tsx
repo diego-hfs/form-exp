@@ -9,9 +9,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { saveConferenciaSeparacao } from '@/services/storage';
 import type { ItemSeparacao } from '@/types/conferencia';
-import { ArrowLeft, ClipboardList, LogOut, Plus, Send, Trash2 } from 'lucide-react';
+import { AlertCircle, ArrowLeft, ClipboardList, LogOut, Plus, Send, Trash2 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 const embalagensOptions = ['Caixa', 'Pallet', 'Saco', 'Tambor', 'Big Bag', 'Fardo', 'Engradado'];
 
@@ -21,6 +22,17 @@ const emptyItem = (): Partial<ItemSeparacao> => ({
   quantidadePallets: 0, quantidade: 0,
 });
 
+const fieldLabels: Record<string, string> = {
+  codigoProduto: 'Código do Produto',
+  descricaoProduto: 'Descrição do Produto',
+  lote: 'Lote',
+  dataFabricacao: 'Data de Fabricação',
+  dataValidade: 'Data de Validade',
+  tipoEmbalagem: 'Tipo de Embalagem',
+  quantidadePallets: 'Qtd. Pallets',
+  quantidade: 'Quantidade',
+};
+
 export default function SeparadorPage() {
   const navigate = useNavigate();
   const { signOut, nome } = useAuth();
@@ -28,6 +40,7 @@ export default function SeparadorPage() {
   const [placaVeiculo, setPlacaVeiculo] = useState('');
   const [itens, setItens] = useState<Partial<ItemSeparacao>[]>([emptyItem()]);
   const [loading, setLoading] = useState(false);
+  const [showErrors, setShowErrors] = useState(false);
 
   const updateItem = (idx: number, field: string, value: string | number) => {
     setItens(prev => prev.map((item, i) => i === idx ? { ...item, [field]: value } : item));
@@ -38,18 +51,42 @@ export default function SeparadorPage() {
     setItens(prev => prev.filter((_, i) => i !== idx));
   };
 
+  const isFieldEmpty = (item: Partial<ItemSeparacao>, field: string): boolean => {
+    const v = (item as any)[field];
+    if (field === 'quantidadePallets' || field === 'quantidade') {
+      return !v || Number(v) <= 0;
+    }
+    return !v || (typeof v === 'string' && !v.trim());
+  };
+
   const isFormValid = () => {
     if (!embarque.trim()) return false;
     return itens.every(item =>
-      item.codigoProduto && item.descricaoProduto && item.lote &&
-      item.dataFabricacao && item.dataValidade && item.tipoEmbalagem &&
-      (item.quantidadePallets ?? 0) > 0 && (item.quantidade ?? 0) > 0
+      Object.keys(fieldLabels).every(f => !isFieldEmpty(item, f))
     );
+  };
+
+  // Lista de pendências para mostrar ao usuário
+  const getPendencias = (): string[] => {
+    const lista: string[] = [];
+    if (!embarque.trim()) lista.push('Número de Embarque');
+    itens.forEach((item, idx) => {
+      Object.entries(fieldLabels).forEach(([field, label]) => {
+        if (isFieldEmpty(item, field)) {
+          lista.push(`Item ${idx + 1}: ${label}`);
+        }
+      });
+    });
+    return lista;
   };
 
   const handleFinalizar = async () => {
     if (!isFormValid()) {
-      toast.error('Preencha todos os campos obrigatórios.');
+      setShowErrors(true);
+      const pendencias = getPendencias();
+      toast.error(`Faltam ${pendencias.length} campo(s) obrigatório(s).`, {
+        description: pendencias.slice(0, 3).join(' • ') + (pendencias.length > 3 ? ` e mais ${pendencias.length - 3}...` : ''),
+      });
       return;
     }
 
@@ -74,6 +111,7 @@ export default function SeparadorPage() {
       setEmbarque('');
       setPlacaVeiculo('');
       setItens([emptyItem()]);
+      setShowErrors(false);
     } catch (err: any) {
       const msg = err?.message || '';
       if (msg.includes('row-level security') || msg.includes('row violates')) {
@@ -85,6 +123,9 @@ export default function SeparadorPage() {
       setLoading(false);
     }
   };
+
+  const errClass = (empty: boolean) => showErrors && empty ? 'border-destructive border-2 focus-visible:ring-destructive' : '';
+  const pendencias = showErrors ? getPendencias() : [];
 
   return (
     <div className="min-h-screen bg-background p-4 max-w-5xl mx-auto">
@@ -109,8 +150,16 @@ export default function SeparadorPage() {
       <Card className="mb-4">
         <CardContent className="pt-6 space-y-4">
           <div>
-            <Label className="text-base font-semibold">Número de Embarque</Label>
-            <Input className="h-12 text-lg mt-2" placeholder="Ex: EMB-001" value={embarque} onChange={e => setEmbarque(e.target.value)} />
+            <Label className="text-base font-semibold">Número de Embarque *</Label>
+            <Input
+              className={cn('h-12 text-lg mt-2', errClass(!embarque.trim()))}
+              placeholder="Ex: EMB-001"
+              value={embarque}
+              onChange={e => setEmbarque(e.target.value)}
+            />
+            {showErrors && !embarque.trim() && (
+              <p className="text-xs text-destructive mt-1">Campo obrigatório</p>
+            )}
           </div>
           <div>
             <Label className="text-base font-semibold">Placa do Veículo</Label>
@@ -127,59 +176,76 @@ export default function SeparadorPage() {
           </Button>
         </CardHeader>
         <CardContent className="space-y-6">
-          {itens.map((item, idx) => (
-            <div key={idx} className="border rounded-lg p-4 space-y-3 relative bg-muted/30">
-              <div className="flex justify-between items-center">
-                <span className="font-semibold text-sm text-muted-foreground">Item {idx + 1}</span>
-                {itens.length > 1 && (
-                  <Button variant="ghost" size="icon" className="text-destructive h-8 w-8" onClick={() => removeItem(idx)}>
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                )}
+          {itens.map((item, idx) => {
+            const empties = Object.fromEntries(
+              Object.keys(fieldLabels).map(f => [f, isFieldEmpty(item, f)])
+            );
+            return (
+              <div key={idx} className="border rounded-lg p-4 space-y-3 relative bg-muted/30">
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold text-sm text-muted-foreground">Item {idx + 1}</span>
+                  {itens.length > 1 && (
+                    <Button variant="ghost" size="icon" className="text-destructive h-8 w-8" onClick={() => removeItem(idx)}>
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <Label>Código do Produto *</Label>
+                    <Input className={cn('h-11', errClass(empties.codigoProduto))} value={item.codigoProduto} onChange={e => updateItem(idx, 'codigoProduto', e.target.value)} />
+                  </div>
+                  <div>
+                    <Label>Descrição do Produto *</Label>
+                    <Input className={cn('h-11', errClass(empties.descricaoProduto))} value={item.descricaoProduto} onChange={e => updateItem(idx, 'descricaoProduto', e.target.value)} />
+                  </div>
+                  <div>
+                    <Label>Lote *</Label>
+                    <Input className={cn('h-11', errClass(empties.lote))} value={item.lote} onChange={e => updateItem(idx, 'lote', e.target.value)} />
+                  </div>
+                  <div>
+                    <Label>Data de Fabricação *</Label>
+                    <DatePickerBR value={item.dataFabricacao || ''} onChange={v => updateItem(idx, 'dataFabricacao', v)} className={errClass(empties.dataFabricacao)} />
+                  </div>
+                  <div>
+                    <Label>Data de Validade *</Label>
+                    <DatePickerBR value={item.dataValidade || ''} onChange={v => updateItem(idx, 'dataValidade', v)} className={errClass(empties.dataValidade)} />
+                  </div>
+                  <div>
+                    <Label>Tipo de Embalagem *</Label>
+                    <Select value={item.tipoEmbalagem} onValueChange={v => updateItem(idx, 'tipoEmbalagem', v)}>
+                      <SelectTrigger className={cn('h-11', errClass(empties.tipoEmbalagem))}><SelectValue placeholder="Selecione" /></SelectTrigger>
+                      <SelectContent>
+                        {embalagensOptions.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Qtd. Pallets *</Label>
+                    <Input type="number" min={0} className={cn('h-11', errClass(empties.quantidadePallets))} value={item.quantidadePallets || ''} onChange={e => updateItem(idx, 'quantidadePallets', Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <Label>Quantidade *</Label>
+                    <Input type="number" min={0} className={cn('h-11', errClass(empties.quantidade))} value={item.quantidade || ''} onChange={e => updateItem(idx, 'quantidade', Number(e.target.value))} />
+                  </div>
+                </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <Label>Código do Produto *</Label>
-                  <Input className="h-11" value={item.codigoProduto} onChange={e => updateItem(idx, 'codigoProduto', e.target.value)} />
-                </div>
-                <div>
-                  <Label>Descrição do Produto *</Label>
-                  <Input className="h-11" value={item.descricaoProduto} onChange={e => updateItem(idx, 'descricaoProduto', e.target.value)} />
-                </div>
-                <div>
-                  <Label>Lote *</Label>
-                  <Input className="h-11" value={item.lote} onChange={e => updateItem(idx, 'lote', e.target.value)} />
-                </div>
-                <div>
-                  <Label>Data de Fabricação *</Label>
-                  <DatePickerBR value={item.dataFabricacao || ''} onChange={v => updateItem(idx, 'dataFabricacao', v)} />
-                </div>
-                <div>
-                  <Label>Data de Validade *</Label>
-                  <DatePickerBR value={item.dataValidade || ''} onChange={v => updateItem(idx, 'dataValidade', v)} />
-                </div>
-                <div>
-                  <Label>Tipo de Embalagem *</Label>
-                  <Select value={item.tipoEmbalagem} onValueChange={v => updateItem(idx, 'tipoEmbalagem', v)}>
-                    <SelectTrigger className="h-11"><SelectValue placeholder="Selecione" /></SelectTrigger>
-                    <SelectContent>
-                      {embalagensOptions.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Qtd. Pallets *</Label>
-                  <Input type="number" min={0} className="h-11" value={item.quantidadePallets || ''} onChange={e => updateItem(idx, 'quantidadePallets', Number(e.target.value))} />
-                </div>
-                <div>
-                  <Label>Quantidade *</Label>
-                  <Input type="number" min={0} className="h-11" value={item.quantidade || ''} onChange={e => updateItem(idx, 'quantidade', Number(e.target.value))} />
-                </div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
 
-          <Button className="w-full h-14 text-lg font-semibold" onClick={handleFinalizar} disabled={!isFormValid() || loading}>
+          {showErrors && pendencias.length > 0 && (
+            <div className="border-2 border-destructive bg-destructive/10 rounded-lg p-4">
+              <div className="flex items-center gap-2 text-destructive font-semibold mb-2">
+                <AlertCircle className="w-5 h-5" />
+                Existem {pendencias.length} pendência(s):
+              </div>
+              <ul className="text-sm text-destructive space-y-1 list-disc list-inside max-h-40 overflow-y-auto">
+                {pendencias.map((p, i) => <li key={i}>{p}</li>)}
+              </ul>
+            </div>
+          )}
+
+          <Button className="w-full h-14 text-lg font-semibold" onClick={handleFinalizar} disabled={loading}>
             <Send className="w-5 h-5 mr-2" /> {loading ? 'Salvando...' : 'Finalizar Separação'}
           </Button>
         </CardContent>
