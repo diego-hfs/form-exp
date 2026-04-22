@@ -283,7 +283,7 @@ export default function LiderPage() {
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="outline" className="w-full h-14 text-base font-semibold border-warning text-warning hover:bg-warning/10" disabled={loading}>
-                  <RotateCcw className="w-5 h-5 mr-2" /> Reabrir Conferência
+                  <RotateCcw className="w-5 h-5 mr-2" /> Reabrir e devolver ao Conferente
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
