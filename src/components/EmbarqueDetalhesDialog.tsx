@@ -94,6 +94,14 @@ export default function EmbarqueDetalhesDialog({ embarque, open, onOpenChange, o
             </div>
             {getStatusBadge(embarque.status)}
           </div>
+          <div className="flex flex-wrap gap-2 pt-2">
+            <Button size="sm" variant="outline" onClick={() => gerarEmbarquePdf(embarque, 'download')}>
+              <Download className="w-4 h-4 mr-2" /> Baixar PDF
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => gerarEmbarquePdf(embarque, 'print')}>
+              <Printer className="w-4 h-4 mr-2" /> Imprimir
+            </Button>
+          </div>
         </DialogHeader>
 
         <ScrollArea className="flex-1 pr-4">
