@@ -200,9 +200,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    // Limpa o estado local primeiro para que componentes parem imediatamente
+    // de fazer polling/requisições e a UI fique responsiva.
     resetTabAuthorization();
     clearLocalState();
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // ignore — o estado já foi limpo localmente
+    }
   };
 
   const nome = user?.user_metadata?.nome?.split(' ')[0] || '';
