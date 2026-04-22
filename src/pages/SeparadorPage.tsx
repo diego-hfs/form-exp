@@ -75,7 +75,12 @@ export default function SeparadorPage() {
       setPlacaVeiculo('');
       setItens([emptyItem()]);
     } catch (err: any) {
-      toast.error(err.message || 'Erro ao salvar separação.');
+      const msg = err?.message || '';
+      if (msg.includes('row-level security') || msg.includes('row violates')) {
+        toast.error('Sessão inválida ou sem permissão. Saia e faça login novamente como Separador.');
+      } else {
+        toast.error(msg || 'Erro ao salvar separação.');
+      }
     } finally {
       setLoading(false);
     }
