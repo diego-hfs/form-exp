@@ -85,8 +85,8 @@ export default function EmbarqueDetalhesDialog({ embarque, open, onOpenChange, o
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl h-[90vh] p-0 flex flex-col gap-0">
+        <DialogHeader className="p-6 pb-3 border-b shrink-0">
           <div className="flex items-center justify-between gap-4 pr-6">
             <div>
               <DialogTitle className="text-xl">Embarque {embarque.numeroEmbarque}</DialogTitle>
@@ -104,7 +104,7 @@ export default function EmbarqueDetalhesDialog({ embarque, open, onOpenChange, o
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 pr-4">
+        <ScrollArea className="flex-1 min-h-0 px-6 py-4">
           {/* Resumo */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm mb-4 p-3 rounded-lg bg-muted/30">
             <div>
