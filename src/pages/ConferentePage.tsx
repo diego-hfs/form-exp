@@ -134,14 +134,32 @@ export default function ConferentePage() {
 
   const isAllFilled = () => {
     return Object.values(conferencias).every(c =>
-      c.codigoProduto && c.descricaoProduto && c.lote && c.dataFabricacao && c.dataValidade &&
-      c.tipoEmbalagem && (c.quantidadePallets ?? 0) > 0 && (c.quantidade ?? 0) > 0
+      Object.keys(fieldLabels).every(f => !isFieldEmpty(c, f))
     );
   };
 
+  const getPendencias = (): string[] => {
+    if (!conferencia) return [];
+    const lista: string[] = [];
+    conferencia.itensSeparacao.forEach((sep, idx) => {
+      const conf = conferencias[sep.id];
+      Object.entries(fieldLabels).forEach(([field, label]) => {
+        if (isFieldEmpty(conf, field)) {
+          lista.push(`Item ${idx + 1}: ${label}`);
+        }
+      });
+    });
+    return lista;
+  };
+
   const handleFinalizar = async () => {
-    if (!conferencia || !isAllFilled()) {
-      toast.error('Preencha todos os campos de conferência.');
+    if (!conferencia) return;
+    if (!isAllFilled()) {
+      setShowErrors(true);
+      const pendencias = getPendencias();
+      toast.error(`Faltam ${pendencias.length} campo(s) obrigatório(s).`, {
+        description: pendencias.slice(0, 3).join(' • ') + (pendencias.length > 3 ? ` e mais ${pendencias.length - 3}...` : ''),
+      });
       return;
     }
     setLoading(true);
