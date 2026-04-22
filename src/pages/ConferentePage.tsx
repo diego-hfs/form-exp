@@ -48,6 +48,7 @@ export default function ConferentePage() {
   const [finalizado, setFinalizado] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingList, setLoadingList] = useState(true);
+  const [showErrors, setShowErrors] = useState(false);
 
   useEffect(() => {
     loadEmbarques();
