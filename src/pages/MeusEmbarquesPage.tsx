@@ -67,10 +67,10 @@ export default function MeusEmbarquesPage() {
 
   useEffect(() => {
     load();
-    const interval = setInterval(() => load(true), 10000);
-    return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nome, perfil]);
+
+  usePolling(() => load(true), 30000, !!(nome && perfil));
 
   const formatDate = (d?: string) => {
     if (!d) return '-';
