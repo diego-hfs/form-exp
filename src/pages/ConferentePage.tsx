@@ -76,6 +76,7 @@ export default function ConferentePage() {
   const abrirConferencia = (found: Conferencia) => {
     setConferencia(found);
     setFinalizado(false);
+    setShowErrors(false);
     const initial: Record<string, Partial<ItemConferencia>> = {};
     found.itensSeparacao.forEach(item => {
       initial[item.id] = {
