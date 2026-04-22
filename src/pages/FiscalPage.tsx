@@ -300,6 +300,14 @@ export default function FiscalPage() {
   }
 
   // List view
+  const termo = embarque.trim().toLowerCase();
+  const pendentes = embarques.filter(e => e.status === 'liberado_lider' || e.status === 'bloqueado_lider');
+  const pendentesFiltrados = termo
+    ? pendentes.filter(e =>
+        e.numeroEmbarque.toLowerCase().includes(termo) ||
+        (e.placaVeiculo || '').toLowerCase().includes(termo))
+    : pendentes;
+
   return (
     <div className="min-h-screen bg-background p-4 max-w-6xl mx-auto">
       <PageHeader>
@@ -331,6 +339,50 @@ export default function FiscalPage() {
         </CardContent>
       </Card>
 
+      {/* Pending list */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <ClipboardList className="w-5 h-5" /> Embarques aguardando validação fiscal
+            <Badge variant="secondary" className="ml-1">{pendentesFiltrados.length}</Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loadingList ? (
+            <p className="text-sm text-muted-foreground py-6 text-center">Carregando embarques...</p>
+          ) : pendentesFiltrados.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-6 text-center">
+              {pendentes.length === 0 ? 'Nenhum embarque aguardando validação fiscal.' : 'Nenhum embarque corresponde à busca.'}
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {pendentesFiltrados.map(emb => {
+                const temDiv = emb.itensConferencia.some(i => i.status === 'divergente');
+                return (
+                  <button
+                    key={emb.id}
+                    onClick={() => selecionarEmbarque(emb)}
+                    className="w-full text-left p-4 rounded-lg border bg-card hover:bg-accent transition-colors flex items-center justify-between gap-3"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-semibold">Embarque {emb.numeroEmbarque}</span>
+                        {emb.placaVeiculo && <span className="text-xs text-muted-foreground">• Placa {emb.placaVeiculo}</span>}
+                        {getStatusBadge(emb.status)}
+                        {temDiv && <Badge variant="destructive" className="text-xs">Divergência</Badge>}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Líder: {emb.lider || '-'} • Conferente: {emb.conferente || '-'} • {formatDate(emb.dataLider)}
+                      </p>
+                    </div>
+                    <ChevronLeft className="w-5 h-5 rotate-180 text-muted-foreground shrink-0" />
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
