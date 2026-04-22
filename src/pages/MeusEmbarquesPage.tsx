@@ -10,6 +10,7 @@ import PageHeader from '@/components/PageHeader';
 import { getConferenciasPorUsuario } from '@/services/storage';
 import type { Conferencia } from '@/types/conferencia';
 import EmbarqueDetalhesDialog from '@/components/EmbarqueDetalhesDialog';
+import { usePolling } from '@/hooks/usePolling';
 
 function getEtapa(c: Conferencia) {
   if (c.status === 'aprovado' || c.status === 'bloqueado') return 'Fiscal';
@@ -67,10 +68,10 @@ export default function MeusEmbarquesPage() {
 
   useEffect(() => {
     load();
-    const interval = setInterval(() => load(true), 10000);
-    return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nome, perfil]);
+
+  usePolling(() => load(true), 30000, !!(nome && perfil));
 
   const formatDate = (d?: string) => {
     if (!d) return '-';
