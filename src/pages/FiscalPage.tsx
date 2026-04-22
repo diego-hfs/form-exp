@@ -165,13 +165,13 @@ export default function FiscalPage() {
               const conf = conferencia.itensConferencia.find(c => c.itemSeparacaoId === sep.id);
               const fields = [
                 { label: 'Código', sepVal: sep.codigoProduto, confVal: conf?.codigoProduto },
-                { label: 'Descrição', sepVal: sep.descricaoProduto, confVal: conf?.descricaoProduto },
+                { label: 'Descrição', sepVal: sep.descricaoProduto, confVal: conf?.descricaoProduto || sep.descricaoProduto },
                 { label: 'Lote', sepVal: sep.lote, confVal: conf?.lote },
-                { label: 'Fabricação', sepVal: formatDateBR(sep.dataFabricacao), confVal: formatDateBR(conf?.dataFabricacao) },
-                { label: 'Validade', sepVal: formatDateBR(sep.dataValidade), confVal: formatDateBR(conf?.dataValidade) },
-                { label: 'Embalagem', sepVal: sep.tipoEmbalagem, confVal: conf?.tipoEmbalagem },
-                { label: 'Pallets', sepVal: String(sep.quantidadePallets), confVal: String(conf?.quantidadePallets) },
-                { label: 'Quantidade', sepVal: String(sep.quantidade), confVal: String(conf?.quantidade) },
+                { label: 'Data de Fabricação', sepVal: formatDateBR(sep.dataFabricacao), confVal: conf ? formatDateBR(conf.dataFabricacao) : undefined },
+                { label: 'Data de Validade', sepVal: formatDateBR(sep.dataValidade), confVal: conf ? formatDateBR(conf.dataValidade) : undefined },
+                { label: 'Tipo de Embalagem', sepVal: sep.tipoEmbalagem, confVal: conf?.tipoEmbalagem },
+                { label: 'Qtde. de Pallets', sepVal: String(sep.quantidadePallets), confVal: conf ? String(conf.quantidadePallets) : undefined },
+                { label: 'Quantidade', sepVal: String(sep.quantidade), confVal: conf ? String(conf.quantidade) : undefined },
               ];
               return (
                 <div key={sep.id} className="mb-6 last:mb-0">
