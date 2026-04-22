@@ -10,12 +10,33 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { getConferenciaPorEmbarque, getEmbarquesParaConferente, saveConferenciaConferente } from '@/services/storage';
 import type { Conferencia, ItemConferencia } from '@/types/conferencia';
-import { ArrowLeft, Search, CheckCircle, XCircle, ClipboardList, LogOut, Package, ChevronLeft } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Search, CheckCircle, XCircle, ClipboardList, LogOut, Package, ChevronLeft } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { toast } from 'sonner';
 import { usePolling } from '@/hooks/usePolling';
+import { cn } from '@/lib/utils';
 
 const embalagensOptions = ['Caixa', 'Pallet', 'Saco', 'Tambor', 'Big Bag', 'Fardo', 'Engradado'];
+
+const fieldLabels: Record<string, string> = {
+  codigoProduto: 'Código do Produto',
+  descricaoProduto: 'Descrição do Produto',
+  lote: 'Lote',
+  dataFabricacao: 'Data de Fabricação',
+  dataValidade: 'Data de Validade',
+  tipoEmbalagem: 'Tipo de Embalagem',
+  quantidadePallets: 'Qtd. Pallets',
+  quantidade: 'Quantidade',
+};
+
+const isFieldEmpty = (item: Partial<ItemConferencia> | undefined, field: string): boolean => {
+  if (!item) return true;
+  const v = (item as any)[field];
+  if (field === 'quantidadePallets' || field === 'quantidade') {
+    return !v || Number(v) <= 0;
+  }
+  return !v || (typeof v === 'string' && !v.trim());
+};
 
 export default function ConferentePage() {
   const navigate = useNavigate();
