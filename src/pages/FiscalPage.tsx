@@ -156,7 +156,7 @@ export default function FiscalPage() {
         {hasDivergencia && !isFinalizado && (
           <div className="flex items-center gap-2 p-3 mb-4 rounded-lg bg-destructive/10 border border-destructive/30">
             <AlertTriangle className="w-5 h-5 text-destructive" />
-            <span className="text-sm font-medium text-destructive">Divergências encontradas. Recomendado: Bloquear expedição.</span>
+            <span className="text-sm font-medium text-destructive">Divergências encontradas.</span>
           </div>
         )}
 
