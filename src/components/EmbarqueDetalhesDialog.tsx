@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { RotateCcw } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -138,41 +138,44 @@ export default function EmbarqueDetalhesDialog({ embarque, open, onOpenChange, o
                       : <Badge variant="destructive">Divergente</Badge>
                     )}
                   </div>
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-28">Campo</TableHead>
-                          <TableHead>Separação</TableHead>
-                          {temConferencia && <TableHead>Conferência</TableHead>}
-                          {temConferencia && <TableHead className="w-16">OK</TableHead>}
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {fields.map(({ label, sepVal, confVal }) => {
-                          const match = sepVal === confVal;
-                          return (
-                            <TableRow key={label} className={temConferencia && !match ? 'bg-destructive/5' : ''}>
-                              <TableCell className="font-medium">{label}</TableCell>
-                              <TableCell>{sepVal}</TableCell>
-                              {temConferencia && (
-                                <TableCell className={!match ? 'text-destructive font-bold' : ''}>
-                                  {confVal || '-'}
-                                </TableCell>
-                              )}
-                              {temConferencia && (
-                                <TableCell>
-                                  {match
-                                    ? <span className="text-success text-lg">✓</span>
-                                    : <span className="text-destructive text-lg">✗</span>}
-                                </TableCell>
-                              )}
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
-                  </div>
+                  <ScrollArea className="w-full whitespace-nowrap rounded-md border">
+                    <div className="min-w-[640px]">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-40">Campo</TableHead>
+                            <TableHead className="min-w-[180px]">Separação</TableHead>
+                            {temConferencia && <TableHead className="min-w-[180px]">Conferência</TableHead>}
+                            {temConferencia && <TableHead className="w-16">OK</TableHead>}
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {fields.map(({ label, sepVal, confVal }) => {
+                            const match = sepVal === confVal;
+                            return (
+                              <TableRow key={label} className={temConferencia && !match ? 'bg-destructive/5' : ''}>
+                                <TableCell className="font-medium">{label}</TableCell>
+                                <TableCell>{sepVal}</TableCell>
+                                {temConferencia && (
+                                  <TableCell className={!match ? 'text-destructive font-bold' : ''}>
+                                    {confVal || '-'}
+                                  </TableCell>
+                                )}
+                                {temConferencia && (
+                                  <TableCell>
+                                    {match
+                                      ? <span className="text-success text-lg">✓</span>
+                                      : <span className="text-destructive text-lg">✗</span>}
+                                  </TableCell>
+                                )}
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                    <ScrollBar orientation="horizontal" />
+                  </ScrollArea>
                 </div>
               );
             })}
