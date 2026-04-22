@@ -370,14 +370,16 @@ export default function FiscalPage() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-semibold">Embarque {emb.numeroEmbarque}</span>
                         {emb.placaVeiculo && <span className="text-xs text-muted-foreground">• Placa {emb.placaVeiculo}</span>}
-                        {getStatusBadge(emb.status)}
-                        {temDiv && <Badge variant="destructive" className="text-xs">Divergência</Badge>}
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
                         Líder: {emb.lider || '-'} • Conferente: {emb.conferente || '-'} • {formatDate(emb.dataLider)}
                       </p>
                     </div>
-                    <ChevronLeft className="w-5 h-5 rotate-180 text-muted-foreground shrink-0" />
+                    <div className="flex items-center gap-2 shrink-0">
+                      {getStatusBadge(emb.status)}
+                      {temDiv && <Badge variant="destructive" className="text-xs">Divergência</Badge>}
+                      <ChevronLeft className="w-5 h-5 rotate-180 text-muted-foreground" />
+                    </div>
                   </button>
                 );
               })}
