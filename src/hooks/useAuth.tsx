@@ -103,9 +103,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let isMounted = true;
     let duplicateTabDetected = false;
 
-    const denyTabAccess = () => {
+    const denyTabAccess = async () => {
       resetTabAuthorization();
       clearLocalState();
+      // Limpa também o JWT do localStorage para evitar que requisições
+      // continuem sendo enviadas com a sessão anterior (causa de erros
+      // de RLS ao tentar inserir/atualizar registros após reload da aba).
+      try {
+        await supabase.auth.signOut({ scope: 'local' });
+      } catch {
+        // ignore
+      }
     };
 
     if (channel) {
