@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { RotateCcw } from 'lucide-react';
+import { RotateCcw, Download, Printer } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { reabrirConferencia, reabrirParaLider } from '@/services/storage';
+import { gerarEmbarquePdf } from '@/lib/embarquePdf';
 import { toast } from 'sonner';
 import type { Conferencia } from '@/types/conferencia';
 
