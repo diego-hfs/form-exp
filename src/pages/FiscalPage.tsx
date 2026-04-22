@@ -18,7 +18,7 @@ function getStatusBadge(status: string) {
   if (status === 'aprovado') return <Badge className="bg-success text-success-foreground">APROVADO</Badge>;
   if (status === 'bloqueado') return <Badge className="bg-destructive text-destructive-foreground">BLOQUEADO</Badge>;
   if (status === 'liberado_lider') return <Badge className="bg-success text-success-foreground">LIBERADO LÍDER</Badge>;
-  if (status === 'bloqueado_lider') return <Badge className="bg-destructive text-destructive-foreground">BLOQUEADO LÍDER</Badge>;
+  if (status === 'bloqueado_lider') return <Badge className="bg-success text-success-foreground">LIBERADO LÍDER</Badge>;
   if (status === 'conferido') return <Badge className="bg-success text-success-foreground">CONFERIDO</Badge>;
   if (status === 'divergente') return <Badge className="bg-destructive text-destructive-foreground">DIVERGENTE</Badge>;
   return <Badge variant="secondary">{status.replace(/_/g, ' ').toUpperCase()}</Badge>;
