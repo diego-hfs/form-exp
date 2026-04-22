@@ -190,6 +190,7 @@ export default function ConferentePage() {
       const updated = await getConferenciaPorEmbarque(conferencia.numeroEmbarque);
       if (updated) setConferencia(updated);
       setFinalizado(true);
+      setShowErrors(false);
       toast.success('Conferência finalizada!');
     } catch (err: any) {
       toast.error(err.message || 'Erro ao salvar conferência.');
