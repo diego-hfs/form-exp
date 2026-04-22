@@ -203,7 +203,7 @@ export default function EmbarqueDetalhesDialog({ embarque, open, onOpenChange, o
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button variant="outline" className="w-full border-warning text-warning hover:bg-warning/10" disabled={reabrindo}>
-                      <RotateCcw className="w-4 h-4 mr-2" /> Reabrir e devolver ao Líder
+                      <RotateCcw className="w-4 h-4 mr-2" /> {perfil === 'lider' ? 'Reabrir e devolver ao Conferente' : 'Reabrir e devolver ao Líder'}
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
