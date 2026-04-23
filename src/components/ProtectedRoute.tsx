@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import type { Perfil } from '@/types/conferencia';
 
@@ -9,6 +9,7 @@ interface Props {
 
 export default function ProtectedRoute({ children, allowedRole }: Props) {
   const { user, loading, perfil, perfis, perfilLoading } = useAuth();
+  const location = useLocation();
 
   if (loading || perfilLoading) {
     return (
@@ -23,7 +24,8 @@ export default function ProtectedRoute({ children, allowedRole }: Props) {
   }
 
   // Usuário tem múltiplos perfis mas ainda não escolheu — manda para seletor
-  if (perfis.length > 1 && !perfil) {
+  // (a menos que já esteja nele, para evitar loop de redirecionamento)
+  if (perfis.length > 1 && !perfil && location.pathname !== '/selecionar-perfil') {
     return <Navigate to="/selecionar-perfil" replace />;
   }
 
@@ -33,4 +35,5 @@ export default function ProtectedRoute({ children, allowedRole }: Props) {
 
   return <>{children}</>;
 }
+
 
