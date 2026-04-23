@@ -11,6 +11,7 @@ import type { Conferencia } from '@/types/conferencia';
 import { ArrowLeft, Search, ShieldCheck, ShieldX, AlertTriangle, ClipboardList, LogOut, Package, ChevronLeft, RotateCcw } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import PageHeader from '@/components/PageHeader';
+import TrocarPerfilButton from '@/components/TrocarPerfilButton';
 import { toast } from 'sonner';
 import { usePolling } from '@/hooks/usePolling';
 
@@ -320,6 +321,7 @@ export default function LiderPage() {
           <Button variant="outline" size="sm" onClick={() => navigate('/meus-embarques')}>
             <ClipboardList className="w-4 h-4 mr-1" /> Meus Embarques
           </Button>
+          <TrocarPerfilButton />
           <Button variant="ghost" size="sm" onClick={signOut} className="text-destructive">
             <LogOut className="w-4 h-4 mr-1" /> Sair
           </Button>
