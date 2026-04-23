@@ -16,6 +16,7 @@ const MeusEmbarquesPage = lazy(() => import("./pages/MeusEmbarquesPage"));
 const ConferentePage = lazy(() => import("./pages/ConferentePage"));
 const LiderPage = lazy(() => import("./pages/LiderPage"));
 const FiscalPage = lazy(() => import("./pages/FiscalPage"));
+const SelecionarPerfilPage = lazy(() => import("./pages/SelecionarPerfilPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -45,6 +46,7 @@ const App = () => (
             <Routes>
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/" element={<ProtectedRoute><LoginPage /></ProtectedRoute>} />
+              <Route path="/selecionar-perfil" element={<ProtectedRoute><SelecionarPerfilPage /></ProtectedRoute>} />
               <Route path="/separador" element={<ProtectedRoute allowedRole="separador"><SeparadorPage /></ProtectedRoute>} />
               <Route path="/meus-embarques" element={<ProtectedRoute><MeusEmbarquesPage /></ProtectedRoute>} />
               <Route path="/conferente" element={<ProtectedRoute allowedRole="conferente"><ConferentePage /></ProtectedRoute>} />
