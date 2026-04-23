@@ -15,16 +15,21 @@ const createTabId = () => {
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 };
 
+const PERFIL_ATIVO_KEY = 'perfil_ativo';
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
   perfil: Perfil | null;
+  perfis: Perfil[];
   perfilLoading: boolean;
   nome: string;
   authorizeTab: () => Promise<void>;
   resetTabAuthorization: () => void;
   signOut: () => Promise<void>;
+  setPerfilAtivo: (p: Perfil) => void;
+  clearPerfilAtivo: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -32,12 +37,16 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   loading: true,
   perfil: null,
+  perfis: [],
   perfilLoading: true,
   nome: '',
   authorizeTab: async () => {},
   resetTabAuthorization: () => {},
   signOut: async () => {},
+  setPerfilAtivo: () => {},
+  clearPerfilAtivo: () => {},
 });
+
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
