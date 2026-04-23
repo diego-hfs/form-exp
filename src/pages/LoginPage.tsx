@@ -8,16 +8,22 @@ import { LogOut } from 'lucide-react';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { user, perfil, perfilLoading, loading, signOut } = useAuth();
+  const { user, perfil, perfis, perfilLoading, loading, signOut } = useAuth();
 
   useEffect(() => {
-    if (!loading && !perfilLoading && user && perfil) {
-      const nome = user.user_metadata?.nome?.split(' ')[0] || 'Usuário';
+    if (loading || perfilLoading || !user) return;
+    const nome = user.user_metadata?.nome?.split(' ')[0] || 'Usuário';
+    sessionStorage.setItem('nome', nome);
+
+    if (perfis.length > 1 && !perfil) {
+      navigate('/selecionar-perfil', { replace: true });
+      return;
+    }
+    if (perfil) {
       sessionStorage.setItem('perfil', perfil);
-      sessionStorage.setItem('nome', nome);
       navigate(`/${perfil}`, { replace: true });
     }
-  }, [user, perfil, loading, perfilLoading, navigate]);
+  }, [user, perfil, perfis, loading, perfilLoading, navigate]);
 
   if (loading || perfilLoading) {
     return (
