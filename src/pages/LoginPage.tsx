@@ -33,8 +33,8 @@ export default function LoginPage() {
     );
   }
 
-  // User is logged in but has no role assigned
-  if (user && !perfil) {
+  // User is logged in but has no role assigned at all
+  if (user && perfis.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="w-full max-w-md shadow-lg">
