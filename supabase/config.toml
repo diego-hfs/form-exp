@@ -1,1 +1,4 @@
 project_id = "rrmoerabkxxjouwluwno"
+
+[functions.create-master-user]
+verify_jwt = false

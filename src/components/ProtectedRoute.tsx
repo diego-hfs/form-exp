@@ -8,7 +8,7 @@ interface Props {
 }
 
 export default function ProtectedRoute({ children, allowedRole }: Props) {
-  const { user, loading, perfil, perfilLoading } = useAuth();
+  const { user, loading, perfil, perfis, perfilLoading } = useAuth();
 
   if (loading || perfilLoading) {
     return (
@@ -22,9 +22,15 @@ export default function ProtectedRoute({ children, allowedRole }: Props) {
     return <Navigate to="/auth" replace />;
   }
 
-  if (allowedRole && perfil !== allowedRole) {
+  // Usuário tem múltiplos perfis mas ainda não escolheu — manda para seletor
+  if (perfis.length > 1 && !perfil) {
+    return <Navigate to="/selecionar-perfil" replace />;
+  }
+
+  if (allowedRole && !perfis.includes(allowedRole)) {
     return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
 }
+

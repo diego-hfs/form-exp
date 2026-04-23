@@ -11,6 +11,7 @@ import { saveConferenciaSeparacao } from '@/services/storage';
 import type { ItemSeparacao } from '@/types/conferencia';
 import { AlertCircle, ArrowLeft, ClipboardList, LogOut, Plus, Send, Trash2 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
+import TrocarPerfilButton from '@/components/TrocarPerfilButton';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -141,6 +142,7 @@ export default function SeparadorPage() {
           <Button variant="outline" size="sm" onClick={() => navigate('/meus-embarques')}>
             <ClipboardList className="w-4 h-4 mr-1" /> Meus Embarques
           </Button>
+          <TrocarPerfilButton />
           <Button variant="ghost" size="sm" onClick={signOut} className="text-destructive">
             <LogOut className="w-4 h-4 mr-1" /> Sair
           </Button>
