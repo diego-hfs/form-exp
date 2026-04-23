@@ -67,6 +67,20 @@ export default function AuthPage() {
         await authorizeTab();
         toast.success('Login realizado com sucesso!');
       } else {
+        // Verificar se já existe um usuário com o mesmo nome
+        const { data: existente } = await supabase
+          .from('profiles')
+          .select('id')
+          .ilike('nome', nome.trim())
+          .maybeSingle();
+
+        if (existente) {
+          resetTabAuthorization();
+          toast.error('Já existe um usuário com este nome. Escolha outro.');
+          setLoading(false);
+          return;
+        }
+
         // Usar e-mail informado ou gerar um automático
         const emailFinal = email.trim() || gerarEmail(nome);
 
