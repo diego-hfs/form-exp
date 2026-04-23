@@ -52,7 +52,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [perfil, setPerfil] = useState<Perfil | null>(null);
+  const [perfis, setPerfis] = useState<Perfil[]>([]);
+  const [perfilAtivo, setPerfilAtivoState] = useState<Perfil | null>(null);
   const [perfilLoading, setPerfilLoading] = useState(true);
   const tabInstanceIdRef = useRef(createTabId());
   const tabAuthorizedRef = useRef(false);
@@ -60,21 +61,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const clearLocalState = () => {
     setUser(null);
     setSession(null);
-    setPerfil(null);
+    setPerfis([]);
+    setPerfilAtivoState(null);
     setLoading(false);
     setPerfilLoading(false);
     sessionStorage.removeItem('perfil');
     sessionStorage.removeItem('nome');
+    sessionStorage.removeItem(PERFIL_ATIVO_KEY);
   };
 
-  const fetchRole = async (userId: string) => {
+  const setPerfilAtivo = (p: Perfil) => {
+    sessionStorage.setItem(PERFIL_ATIVO_KEY, p);
+    sessionStorage.setItem('perfil', p);
+    setPerfilAtivoState(p);
+  };
+
+  const clearPerfilAtivo = () => {
+    sessionStorage.removeItem(PERFIL_ATIVO_KEY);
+    sessionStorage.removeItem('perfil');
+    setPerfilAtivoState(null);
+  };
+
+  const fetchRoles = async (userId: string) => {
     setPerfilLoading(true);
     const { data } = await supabase
       .from('user_roles')
       .select('role')
-      .eq('user_id', userId)
-      .maybeSingle();
-    setPerfil((data?.role as Perfil) ?? null);
+      .eq('user_id', userId);
+    const lista = (data?.map(r => r.role) ?? []) as Perfil[];
+    setPerfis(lista);
+
+    // Se tem apenas 1 perfil, ativa automaticamente.
+    // Se tem mais de 1, restaura o salvo (se ainda válido) ou deixa null para o seletor escolher.
+    if (lista.length === 1) {
+      setPerfilAtivo(lista[0]);
+    } else if (lista.length > 1) {
+      const salvo = sessionStorage.getItem(PERFIL_ATIVO_KEY) as Perfil | null;
+      if (salvo && lista.includes(salvo)) {
+        setPerfilAtivoState(salvo);
+      } else {
+        setPerfilAtivoState(null);
+      }
+    } else {
+      setPerfilAtivoState(null);
+    }
     setPerfilLoading(false);
   };
 
@@ -84,11 +114,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(false);
 
     if (nextSession?.user) {
-      await fetchRole(nextSession.user.id);
+      await fetchRoles(nextSession.user.id);
       return;
     }
 
-    setPerfil(null);
+    setPerfis([]);
+    setPerfilAtivoState(null);
     setPerfilLoading(false);
   };
 
@@ -103,6 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     sessionStorage.removeItem(TAB_AUTHORIZED_KEY);
     tabAuthorizedRef.current = false;
   };
+
 
   useEffect(() => {
     const tabId = sessionStorage.getItem(TAB_ID_KEY);
