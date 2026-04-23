@@ -89,7 +89,17 @@ export default function AuthPage() {
           password,
           options: { data: { nome: nome.trim() } },
         });
-        if (error) throw error;
+        if (error) {
+          // Detecta erro de nome duplicado vindo do trigger no banco
+          const msg = (error.message || '').toLowerCase();
+          if (msg.includes('já existe um usuário') || msg.includes('unique') || msg.includes('duplicate')) {
+            resetTabAuthorization();
+            toast.error('Já existe um usuário com este nome. Escolha outro.');
+            setLoading(false);
+            return;
+          }
+          throw error;
+        }
 
         // Profile is now auto-created by database trigger
 
