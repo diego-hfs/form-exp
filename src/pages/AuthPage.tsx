@@ -12,7 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 export default function AuthPage() {
   const navigate = useNavigate();
-  const { user, perfil, authorizeTab, resetTabAuthorization } = useAuth();
+  const { user, perfil, perfis, authorizeTab, resetTabAuthorization } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
@@ -21,8 +21,13 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user && perfil) navigate(`/${perfil}`, { replace: true });
-  }, [user, perfil, navigate]);
+    if (!user) return;
+    if (perfil) {
+      navigate(`/${perfil}`, { replace: true });
+    } else if (perfis.length > 1) {
+      navigate('/selecionar-perfil', { replace: true });
+    }
+  }, [user, perfil, perfis, navigate]);
 
   useEffect(() => {
     resetTabAuthorization();
