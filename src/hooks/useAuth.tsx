@@ -255,10 +255,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const nome = user?.user_metadata?.nome?.split(' ')[0] || '';
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, perfil, perfilLoading, nome, authorizeTab, resetTabAuthorization, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, perfil: perfilAtivo, perfis, perfilLoading, nome, authorizeTab, resetTabAuthorization, signOut, setPerfilAtivo, clearPerfilAtivo }}>
       {children}
     </AuthContext.Provider>
   );
+
 }
 
 export const useAuth = () => useContext(AuthContext);
