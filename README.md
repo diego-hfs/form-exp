@@ -212,10 +212,3 @@ Diego Hernando Ferreira da Silva
 Profissional com experiência em Logística, Supply Chain, WMS, Dados e Tecnologia, desenvolvendo soluções voltadas à melhoria de processos e à integração entre operação e sistemas.
 
 Este projeto faz parte do meu processo de desenvolvimento em Engenharia de Software, aplicando tecnologia a problemas reais encontrados em operações logísticas.
-
-Bash
-
-git clone https://github.com/diego-hfs/form-exp.git
-cd form-exp
-npm install
-npm run dev
