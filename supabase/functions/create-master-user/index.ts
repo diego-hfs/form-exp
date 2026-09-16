@@ -16,9 +16,9 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const NOME = "diego.hernando";
+    const NOME = "";
     const EMAIL = "diego.hernando@interno.app";
-    const PASSWORD = "Wms.2020";
+    const PASSWORD = "";
     const ROLES = ["separador", "conferente", "fiscal", "lider"] as const;
 
     // 1. Verifica se já existe profile com esse nome
