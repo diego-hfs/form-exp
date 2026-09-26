@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Boxes, ClipboardCheck, ShieldCheck, UserCog, LogOut } from 'lucide-react';
-import logoNitro from '@/assets/logo-nitro.png';
+import BrandLogo from '@/components/BrandLogo';
 import type { Perfil } from '@/types/conferencia';
 
 const PERFIL_INFO: Record<Perfil, { label: string; icon: React.ComponentType<{ className?: string }>; color: string }> = {
@@ -27,7 +27,7 @@ export default function SelecionarPerfilPage() {
       <Card className="w-full max-w-lg shadow-lg">
         <CardHeader className="text-center space-y-2">
           <div className="mx-auto">
-            <img src={logoNitro} alt="Nitro" className="h-32 object-contain mx-auto" />
+            <BrandLogo compact />
           </div>
           <CardTitle className="text-xl font-bold">Olá, {nome}!</CardTitle>
           <p className="text-muted-foreground text-sm">Selecione o perfil que deseja usar agora</p>

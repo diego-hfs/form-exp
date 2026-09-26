@@ -1,0 +1,23 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: expedicheck:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      VITE_DEMO_MODE: "true"
+
+  visual:
+    build:
+      context: .
+      dockerfile: Dockerfile.visual
+    image: expedicheck-visual:latest
+    ports:
+      - "6080:6080"
+    environment:
+      VITE_DEMO_MODE: "true"

@@ -1,4 +1,4 @@
-import logoNitro from '@/assets/logo-nitro.png';
+import BrandLogo from '@/components/BrandLogo';
 
 interface PageHeaderProps {
   children?: React.ReactNode;
@@ -6,11 +6,9 @@ interface PageHeaderProps {
 
 export default function PageHeader({ children }: PageHeaderProps) {
   return (
-    <div className="flex items-center justify-between mb-6">
-      <div className="flex items-center gap-3">
-        {children}
-      </div>
-      <img src={logoNitro} alt="Nitro" className="h-32 object-contain" />
+    <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
+      <div className="flex items-center gap-3 flex-1 min-w-[260px]">{children}</div>
+      <BrandLogo compact />
     </div>
   );
 }

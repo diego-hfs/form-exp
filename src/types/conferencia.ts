@@ -1,13 +1,24 @@
 export type Perfil = 'separador' | 'conferente' | 'lider' | 'fiscal';
 
-export type StatusConferencia = 
-  | 'aguardando_conferencia' 
-  | 'conferido' 
-  | 'divergente' 
+export type StatusConferencia =
+  | 'aguardando_conferencia'
+  | 'conferido'
+  | 'divergente'
   | 'liberado_lider'
   | 'bloqueado_lider'
-  | 'aprovado' 
+  | 'aprovado'
   | 'bloqueado';
+
+export interface DadosExpedicao {
+  pedido: string;
+  destinatario: string;
+  cidadeDestino: string;
+  ufDestino: string;
+  placaVeiculo: string;
+  tipoVeiculo: string;
+  motorista: string;
+  doca: string;
+}
 
 export interface ItemSeparacao {
   id: string;
@@ -38,7 +49,14 @@ export interface ItemConferencia {
 export interface Conferencia {
   id: string;
   numeroEmbarque: string;
+  pedido: string;
+  destinatario: string;
+  cidadeDestino: string;
+  ufDestino: string;
   placaVeiculo?: string;
+  tipoVeiculo?: string;
+  motorista?: string;
+  doca?: string;
   separador: string;
   conferente?: string;
   lider?: string;

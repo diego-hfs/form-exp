@@ -8,7 +8,7 @@ import { DatePickerBR } from '@/components/DatePickerBR';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { saveConferenciaSeparacao } from '@/services/storage';
-import type { ItemSeparacao } from '@/types/conferencia';
+import type { DadosExpedicao, ItemSeparacao } from '@/types/conferencia';
 import { AlertCircle, ArrowLeft, ClipboardList, LogOut, Plus, Send, Trash2 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import TrocarPerfilButton from '@/components/TrocarPerfilButton';
@@ -38,7 +38,7 @@ export default function SeparadorPage() {
   const navigate = useNavigate();
   const { signOut, nome } = useAuth();
   const [embarque, setEmbarque] = useState('');
-  const [placaVeiculo, setPlacaVeiculo] = useState('');
+  const [dadosExpedicao, setDadosExpedicao] = useState<DadosExpedicao>({ pedido: '', destinatario: '', cidadeDestino: '', ufDestino: '', placaVeiculo: '', tipoVeiculo: '', motorista: '', doca: '' });
   const [itens, setItens] = useState<Partial<ItemSeparacao>[]>([emptyItem()]);
   const [loading, setLoading] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
@@ -62,6 +62,7 @@ export default function SeparadorPage() {
 
   const isFormValid = () => {
     if (!embarque.trim()) return false;
+    if (Object.values(dadosExpedicao).some(v => !v.trim())) return false;
     return itens.every(item =>
       Object.keys(fieldLabels).every(f => !isFieldEmpty(item, f))
     );
@@ -71,6 +72,8 @@ export default function SeparadorPage() {
   const getPendencias = (): string[] => {
     const lista: string[] = [];
     if (!embarque.trim()) lista.push('Número de Embarque');
+    const dadosLabels: Record<keyof DadosExpedicao, string> = { pedido: 'Pedido', destinatario: 'Destinatário', cidadeDestino: 'Cidade de destino', ufDestino: 'UF', placaVeiculo: 'Placa do veículo', tipoVeiculo: 'Tipo de veículo', motorista: 'Motorista', doca: 'Doca' };
+    (Object.keys(dadosLabels) as (keyof DadosExpedicao)[]).forEach(k => { if (!dadosExpedicao[k].trim()) lista.push(dadosLabels[k]); });
     itens.forEach((item, idx) => {
       Object.entries(fieldLabels).forEach(([field, label]) => {
         if (isFieldEmpty(item, field)) {
@@ -106,11 +109,11 @@ export default function SeparadorPage() {
           quantidadePallets: Number(item.quantidadePallets),
           quantidade: Number(item.quantidade),
         })),
-        placaVeiculo.trim() || undefined
+        dadosExpedicao
       );
       toast.success('Separação finalizada com sucesso!');
       setEmbarque('');
-      setPlacaVeiculo('');
+      setDadosExpedicao({ pedido: '', destinatario: '', cidadeDestino: '', ufDestino: '', placaVeiculo: '', tipoVeiculo: '', motorista: '', doca: '' });
       setItens([emptyItem()]);
       setShowErrors(false);
     } catch (err: any) {
@@ -163,9 +166,27 @@ export default function SeparadorPage() {
               <p className="text-xs text-destructive mt-1">Campo obrigatório</p>
             )}
           </div>
-          <div>
-            <Label className="text-base font-semibold">Placa do Veículo</Label>
-            <Input className="h-12 text-lg mt-2" placeholder="Ex: ABC-1234" value={placaVeiculo} onChange={e => setPlacaVeiculo(e.target.value.toUpperCase())} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {[
+              ['pedido', 'Pedido', 'Ex: PED-45872'],
+              ['destinatario', 'Destinatário', 'Ex: Distribuidora Demo Ltda.'],
+              ['cidadeDestino', 'Cidade de destino', 'Ex: Goiânia'],
+              ['ufDestino', 'UF', 'Ex: GO'],
+              ['placaVeiculo', 'Placa do veículo', 'Ex: DEM-1A23'],
+              ['tipoVeiculo', 'Tipo de veículo', 'Ex: VUC / Truck / Carreta'],
+              ['motorista', 'Motorista', 'Ex: Carlos Demonstrativo'],
+              ['doca', 'Doca', 'Ex: 04'],
+            ].map(([field, label, placeholder]) => (
+              <div key={field}>
+                <Label className="text-base font-semibold">{label} *</Label>
+                <Input
+                  className={cn('h-11 mt-2', errClass(showErrors && !dadosExpedicao[field as keyof DadosExpedicao].trim()))}
+                  placeholder={placeholder}
+                  value={dadosExpedicao[field as keyof DadosExpedicao]}
+                  onChange={e => setDadosExpedicao(prev => ({ ...prev, [field]: field === 'ufDestino' || field === 'placaVeiculo' ? e.target.value.toUpperCase() : e.target.value }))}
+                />
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
