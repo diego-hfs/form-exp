@@ -1,196 +1,67 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import logoNitro from '@/assets/logo-nitro.png';
+import { Badge } from '@/components/ui/badge';
+import { RotateCcw, PlayCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
-
+import BrandLogo from '@/components/BrandLogo';
+import { resetDemoData } from '@/services/storage';
 
 export default function AuthPage() {
   const navigate = useNavigate();
-  const { user, perfil, perfis, authorizeTab, resetTabAuthorization } = useAuth();
-  const [isLogin, setIsLogin] = useState(true);
-  const [nome, setNome] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  
+  const { user, perfil, perfis, loginDemo } = useAuth();
+  const [nome, setNome] = useState('Usuário Demo');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!user) return;
-    if (perfil) {
-      navigate(`/${perfil}`, { replace: true });
-    } else if (perfis.length > 1) {
-      navigate('/selecionar-perfil', { replace: true });
-    }
+    if (perfil) navigate(`/${perfil}`, { replace: true });
+    else if (perfis.length > 1) navigate('/selecionar-perfil', { replace: true });
   }, [user, perfil, perfis, navigate]);
 
-  useEffect(() => {
-    resetTabAuthorization();
-    setNome('');
-    setEmail('');
-    setPassword('');
-  }, [resetTabAuthorization, isLogin]);
-
-  const gerarEmail = (nome: string) => {
-    const slug = nome.trim().toLowerCase().replace(/\s+/g, '.').replace(/[^a-z0-9.]/g, '');
-    return `${slug}.${Date.now()}@interno.app`;
+  const entrar = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    await loginDemo(nome);
+    setLoading(false);
+    toast.success('Modo demonstração iniciado.');
+    navigate('/selecionar-perfil', { replace: true });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!nome.trim() || !password.trim()) return;
-
-    setLoading(true);
-    try {
-      resetTabAuthorization();
-
-      if (isLogin) {
-        // Tentar buscar pelo nome no profiles
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('email_gerado')
-          .ilike('nome', nome.trim())
-          .maybeSingle();
-
-        if (!profile) {
-          resetTabAuthorization();
-          toast.error('Usuário não encontrado. Verifique o nome.');
-          setLoading(false);
-          return;
-        }
-
-        const { error } = await supabase.auth.signInWithPassword({
-          email: profile.email_gerado,
-          password,
-        });
-        if (error) throw error;
-        await authorizeTab();
-        toast.success('Login realizado com sucesso!');
-      } else {
-        // Verificar se já existe um usuário com o mesmo nome
-        const { data: existente } = await supabase
-          .from('profiles')
-          .select('id')
-          .ilike('nome', nome.trim())
-          .maybeSingle();
-
-        if (existente) {
-          resetTabAuthorization();
-          toast.error('Já existe um usuário com este nome. Escolha outro.');
-          setLoading(false);
-          return;
-        }
-
-        // Usar e-mail informado ou gerar um automático
-        const emailFinal = email.trim() || gerarEmail(nome);
-
-        const { data, error } = await supabase.auth.signUp({
-          email: emailFinal,
-          password,
-          options: { data: { nome: nome.trim() } },
-        });
-        if (error) {
-          // Detecta erro de nome duplicado vindo do trigger no banco
-          const msg = (error.message || '').toLowerCase();
-          if (msg.includes('já existe um usuário') || msg.includes('unique') || msg.includes('duplicate')) {
-            resetTabAuthorization();
-            toast.error('Já existe um usuário com este nome. Escolha outro.');
-            setLoading(false);
-            return;
-          }
-          throw error;
-        }
-
-        // Profile is now auto-created by database trigger
-
-        // Deslogar após cadastro para voltar à tela de login
-        await supabase.auth.signOut();
-        resetTabAuthorization();
-        toast.success('Conta criada! Aguarde o administrador atribuir seu perfil.');
-        setIsLogin(true);
-        setNome('');
-        setEmail('');
-        setPassword('');
-      }
-    } catch (err: any) {
-      resetTabAuthorization();
-      toast.error(err.message || 'Erro na autenticação.');
-    } finally {
-      setLoading(false);
-    }
+  const reiniciar = () => {
+    resetDemoData();
+    toast.success('Dados fictícios restaurados.');
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="text-center space-y-2">
-          <div className="mx-auto">
-            <img src={logoNitro} alt="Nitro" className="h-44 object-contain mx-auto" />
+      <Card className="w-full max-w-lg shadow-lg">
+        <CardHeader className="space-y-4">
+          <div className="flex justify-center"><BrandLogo /></div>
+          <div className="text-center space-y-2">
+            <Badge variant="secondary">DEMO LOCAL • DADOS FICTÍCIOS</Badge>
+            <CardTitle className="text-2xl">Formulário de Double Check</CardTitle>
+            <p className="text-sm text-muted-foreground">Simule o fluxo operacional completo sem conta, banco externo ou credenciais.</p>
           </div>
-          <CardTitle className="text-2xl font-bold">Formulário Conferência de Expedição</CardTitle>
-          <p className="text-muted-foreground text-sm">
-            {isLogin ? 'Faça login para continuar' : 'Crie sua conta'}
-          </p>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <CardContent className="space-y-4">
+          <form onSubmit={entrar} className="space-y-4">
             <div className="space-y-2">
-              <Label>{isLogin ? 'Nome de usuário' : 'Nome completo'}</Label>
-              <Input
-                type="text"
-                className="h-12 text-base"
-                placeholder={isLogin ? 'Digite seu nome' : 'Seu nome completo'}
-                value={nome}
-                onChange={e => setNome(e.target.value)}
-                required
-              />
+              <Label>Nome para a demonstração</Label>
+              <Input className="h-12" value={nome} onChange={e => setNome(e.target.value)} placeholder="Ex: Usuário Demo" />
             </div>
-
-            {!isLogin && (
-              <div className="space-y-2">
-                <Label>E-mail <span className="text-muted-foreground text-xs">(opcional)</span></Label>
-                <Input
-                  type="email"
-                  className="h-12 text-base"
-                  placeholder="seu@email.com"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                />
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <Label>Senha</Label>
-              <Input
-                type="password"
-                className="h-12 text-base"
-                placeholder="••••••••"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                required
-                minLength={6}
-              />
-            </div>
-
-
-            <Button type="submit" className="w-full h-14 text-lg font-semibold" disabled={loading}>
-              {loading ? 'Aguarde...' : isLogin ? 'Entrar' : 'Criar Conta'}
+            <Button className="w-full h-12 text-base" disabled={loading}>
+              <PlayCircle className="w-5 h-5 mr-2" /> {loading ? 'Iniciando...' : 'Entrar no modo demonstração'}
             </Button>
           </form>
-          <div className="text-center mt-4">
-            <button
-              type="button"
-              className="text-sm text-primary hover:underline"
-              onClick={() => { setIsLogin(!isLogin); setEmail(''); }}
-            >
-              {isLogin ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Faça login'}
-            </button>
-          </div>
+          <Button variant="outline" className="w-full" onClick={reiniciar}>
+            <RotateCcw className="w-4 h-4 mr-2" /> Restaurar dados de exemplo
+          </Button>
+          <p className="text-xs text-muted-foreground text-center">Os dados ficam somente no localStorage do navegador e podem ser apagados a qualquer momento.</p>
         </CardContent>
       </Card>
     </div>

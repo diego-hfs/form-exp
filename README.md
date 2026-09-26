@@ -1,214 +1,165 @@
-📦 Double Check de Expedição
+# 📦 ExpediCheck — Double Check de Expedição
 
-Sistema web desenvolvido para apoiar o processo de conferência de mercadorias na expedição, criando uma segunda camada de validação entre o material físico movimentado pela operação e as informações registradas no sistema.
+Projeto de portfólio desenvolvido em **React + TypeScript** para demonstrar um fluxo digital de double check no processo de expedição logística.
 
-O projeto nasceu a partir de uma necessidade comum em operações logísticas: reduzir divergências entre o estoque físico e o estoque sistêmico antes que a mercadoria deixe o Centro de Distribuição.
+A aplicação simula as etapas **Separador → Conferente → Líder → Fiscal**, permitindo registrar dados de veículo, destinatário, pedido e produtos, comparar o físico com o previsto e controlar divergências antes da liberação da expedição.
 
-🎯 Objetivo
+> Todos os nomes, pedidos, veículos, destinatários, produtos e demais dados da demonstração são fictícios.
 
-O principal objetivo da aplicação é permitir que a operação realize um Double Check das mercadorias durante a expedição.
+## 🎯 Objetivo
 
-A proposta é adicionar uma etapa de conferência antes da conclusão do processo, ajudando a identificar possíveis divergências entre aquilo que está fisicamente sendo expedido e aquilo que foi registrado no sistema.
+Criar uma barreira adicional de qualidade no outbound para reduzir erros de expedição, melhorar a rastreabilidade e identificar divergências antes que a carga deixe a operação.
 
-Com isso, a solução busca contribuir para:
+## 🔄 Fluxo demonstrado
 
-* redução de erros de expedição;
-* maior acuracidade entre físico e sistêmico;
-* prevenção de divergências antes do envio da mercadoria;
-* maior rastreabilidade das conferências;
-* padronização do processo operacional;
-* redução de retrabalho;
-* apoio à melhoria da qualidade do processo logístico.
+```text
+Separador
+   ↓
+Conferente / Double Check
+   ↓
+Líder / análise de divergência
+   ↓
+Fiscal / validação final
+   ↓
+Expedição aprovada ou bloqueada
+```
 
-🔄 Conceito do processo
+### Separador
+Registra o embarque, pedido, destinatário, cidade/UF, veículo, motorista, doca e os itens separados.
 
-O fluxo proposto é baseado em uma validação adicional da expedição:
+### Conferente
+Realiza o double check sem depender dos dados digitados pelo separador e compara código, descrição, lote, datas, embalagem, pallets e quantidade.
 
-Separação da mercadoria → Conferência → Double Check → Validação → Expedição
+### Líder
+Analisa o resultado da conferência e decide pela liberação ou bloqueio operacional.
 
-A ideia é que a mercadoria passe por uma segunda validação antes de deixar a operação.
+### Fiscal
+Faz a validação final e registra a decisão da expedição.
 
-Caso as informações estejam corretas, o processo pode seguir normalmente.
+## 🧪 Modo demonstração
 
-Caso exista alguma divergência, ela pode ser identificada antes da expedição, permitindo que a operação realize a análise e correção necessária.
+A versão pública funciona **sem banco externo, sem credenciais e sem serviços corporativos**. Os dados são persistidos apenas no `localStorage` do navegador.
 
-💡 Problema de negócio
+Ao entrar, o usuário de demonstração possui acesso aos quatro perfis para percorrer o processo completo. O botão **Restaurar dados de exemplo** recria cenários em diferentes etapas do fluxo.
 
-Em operações de armazenagem e distribuição, uma divergência entre o material físico e o registro sistêmico pode gerar diversos impactos, como:
+## 🔐 Segurança e independência
 
-* envio de produto incorreto;
-* quantidade divergente;
-* diferenças de estoque;
-* retrabalho operacional;
-* devoluções;
-* reclamações de clientes;
-* custos adicionais de transporte;
-* necessidade de ajustes sistêmicos.
+Esta versão pública foi preparada para portfólio:
 
-Identificar o problema antes da saída da mercadoria tende a ser mais eficiente do que realizar a correção depois que o produto já foi expedido.
+- sem Lovable / `lovable-tagger`;
+- sem referências ao GPT Engineer;
+- sem identidade ou logotipos corporativos;
+- sem usuário master hard-coded;
+- sem chaves privadas ou `service_role`;
+- sem Supabase obrigatório;
+- sem dados pessoais ou operacionais reais.
 
-Por isso, o projeto utiliza o conceito de Double Check como uma barreira adicional de qualidade dentro do processo de Outbound.
+## 🛠️ Tecnologias
 
-🖥️ Solução
+- React 18
+- TypeScript
+- Vite
+- Tailwind CSS
+- Radix UI / shadcn-style components
+- TanStack React Query
+- React Router
+- Vitest
+- jsPDF / AutoTable
+- Docker / Docker Compose
+- Chromium + Xvfb + noVNC (visualização opcional em desktop virtual)
 
-A aplicação foi desenvolvida como uma interface web para apoiar a operação durante o processo de conferência.
+## ▶️ Executar com Docker
 
-O sistema busca transformar uma etapa operacional de validação em um processo digital, estruturado e rastreável.
+Não é necessário instalar Node.js no Windows.
 
-Além do desenvolvimento técnico, o projeto foi pensado a partir de uma visão de processo logístico, conectando conceitos de Supply Chain, Expedição, Sistemas e Engenharia de Software.
+### Aplicação web
 
-🛠️ Tecnologias utilizadas
+```bash
+docker compose up --build app
+```
 
-Front-end
+Abra:
 
-* React
-* TypeScript
-* Vite
-* Tailwind CSS
-* Radix UI
-* React Hook Form
-* Zod
-* TanStack React Query
+```text
+http://localhost:8080
+```
 
-Back-end / Banco de Dados
+### Visualização opcional via noVNC
 
-* Supabase
+```bash
+docker compose up --build visual
+```
 
-Relatórios e visualização
+Abra:
 
-* jsPDF
-* jsPDF AutoTable
-* Recharts
+```text
+http://localhost:6080/vnc.html?autoconnect=1&resize=scale
+```
 
-Qualidade e testes
+O noVNC apenas disponibiliza a aplicação dentro de um desktop virtual Docker. **Não existe automação de cliques ou PyAutoGUI neste projeto.**
 
-* ESLint
-* Vitest
-* Testing Library
-
-🏗️ Arquitetura
-
-O projeto utiliza uma arquitetura web baseada em componentes React.
-
-De forma simplificada:
-
-┌─────────────────────────┐
-│      Operação           │
-│ Conferência / Expedição │
-└────────────┬────────────┘
-             │
-             ▼
-┌─────────────────────────┐
-│      Aplicação Web      │
-│   React + TypeScript    │
-└────────────┬────────────┘
-             │
-             ▼
-┌─────────────────────────┐
-│        Supabase         │
-│ Backend / Persistência  │
-└─────────────────────────┘
-
-Essa estrutura permite separar a interface utilizada pela operação da camada responsável pelo armazenamento e gerenciamento dos dados.
-
-🚀 Executando o projeto localmente
-
-Pré-requisitos
-
-Tenha instalado:
-
-* Node.js
-* npm
-* Git
-
-Clone o repositório
-
-git clone https://github.com/diego-hfs/form-exp.git
-
-Entre no diretório
-
-cd form-exp
-
-Instale as dependências
-
-npm install
-
-Execute o ambiente de desenvolvimento
-
-npm run dev
-
-Executar testes
-
-npm test
-
-Gerar versão de produção
-
-npm run build
-
-📊 Visão de negócio
-
-Mais do que desenvolver uma aplicação, este projeto procura demonstrar como a tecnologia pode ser utilizada para resolver um problema real de uma operação logística.
-
-O conceito pode ser aplicado em ambientes como:
-
-* Centros de Distribuição;
-* armazéns;
-* indústrias;
-* operadores logísticos;
-* e-commerce;
-* operações de fulfillment;
-* operações integradas a WMS e ERP.
-
-Uma possível evolução seria integrar diretamente a aplicação com sistemas corporativos, permitindo comparar automaticamente as informações conferidas fisicamente com os registros existentes em um WMS ou ERP.
-
-🔮 Possíveis evoluções
-
-Entre as evoluções possíveis para o projeto estão:
-
-* integração com WMS/ERP via API;
-* leitura de código de barras ou QR Code;
-* validação automática entre físico e sistêmico;
-* registro de divergências;
-* trilha de auditoria das conferências;
-* dashboards com indicadores de acuracidade;
-* indicadores de divergência por produto ou operação;
-* identificação do usuário responsável pela conferência;
-* relatórios gerenciais;
-* alertas para divergências críticas.
-
-📚 Conceitos aplicados
-
-O projeto envolve conhecimentos de diferentes áreas:
-
-Logística
-
-* Expedição / Outbound
-* Conferência
-* Acuracidade de estoque
-* Controle operacional
-* Prevenção de divergências
-
-Tecnologia
-
-* Desenvolvimento Web
-* Front-end
-* Banco de Dados
-* Validação de dados
-* Testes de Software
-* Integração de Sistemas
-
-Negócio
-
-* Melhoria de processos
-* Redução de erros
-* Rastreabilidade
-* Padronização operacional
-* Transformação digital
-
-👨‍💻 Autor
-
-Diego Hernando Ferreira da Silva
-
-Profissional com experiência em Logística, Supply Chain, WMS, Dados e Tecnologia, desenvolvendo soluções voltadas à melhoria de processos e à integração entre operação e sistemas.
-
-Este projeto faz parte do meu processo de desenvolvimento em Engenharia de Software, aplicando tecnologia a problemas reais encontrados em operações logísticas.
+## 🧪 Testes e build
+
+```bash
+docker run --rm -v "$PWD:/app" -w /app node:22 npm install
+docker run --rm -v "$PWD:/app" -w /app node:22 npm test
+docker run --rm -v "$PWD:/app" -w /app node:22 npm run build
+```
+
+No PowerShell, use o caminho absoluto ou `${PWD}` conforme seu ambiente Docker Desktop.
+
+## 📁 Estrutura principal
+
+```text
+src/
+├── components/
+├── hooks/
+├── lib/
+├── pages/
+│   ├── SeparadorPage.tsx
+│   ├── ConferentePage.tsx
+│   ├── LiderPage.tsx
+│   └── FiscalPage.tsx
+├── services/
+│   └── storage.ts
+└── types/
+    └── conferencia.ts
+
+docker/
+└── start-visual.sh
+
+Dockerfile
+Dockerfile.visual
+docker-compose.yml
+```
+
+## 📌 Status
+
+| Componente | Status |
+|---|---|
+| Desvinculação do Lovable | ✅ Concluída |
+| Identidade fictícia | ✅ Concluída |
+| Dados fictícios locais | ✅ Implementado |
+| Fluxo Separador → Conferente → Líder → Fiscal | ✅ Mantido |
+| Dados de veículo / destinatário / pedido | ✅ Implementado |
+| Persistência demo em localStorage | ✅ Implementado |
+| Docker web | 🧪 Pronto para validação local |
+| noVNC manual | 🧪 Pronto para validação local |
+| Integração com backend real | ⏳ Evolução futura |
+
+## 🔮 Evoluções futuras
+
+- integração com WMS/ERP via API;
+- persistência em banco de dados;
+- autenticação corporativa;
+- leitura de código de barras/QR Code;
+- trilha de auditoria;
+- dashboards de divergência e acuracidade;
+- observações e motivos padronizados de bloqueio;
+- anexos/fotos da ocorrência.
+
+## 👨‍💻 Autor
+
+**Diego Hernando Ferreira da Silva**
+
+Projeto de portfólio que conecta experiência em Logística, Supply Chain e WMS com práticas de Engenharia de Software.

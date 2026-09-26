@@ -142,6 +142,15 @@ export default function LiderPage() {
           </div>
         </PageHeader>
 
+        <Card className="mb-4 border-dashed">
+          <CardContent className="pt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+            <div><span className="text-muted-foreground text-xs">Pedido</span><p className="font-medium">{conferencia.pedido || '-'}</p></div>
+            <div><span className="text-muted-foreground text-xs">Destinatário</span><p className="font-medium">{conferencia.destinatario || '-'}</p></div>
+            <div><span className="text-muted-foreground text-xs">Destino</span><p className="font-medium">{conferencia.cidadeDestino || '-'} / {conferencia.ufDestino || '-'}</p></div>
+            <div><span className="text-muted-foreground text-xs">Veículo / Doca</span><p className="font-medium">{conferencia.placaVeiculo || '-'} • {conferencia.doca || '-'}</p></div>
+          </CardContent>
+        </Card>
+
         <Card className="mb-4">
           <CardContent className="pt-6">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">

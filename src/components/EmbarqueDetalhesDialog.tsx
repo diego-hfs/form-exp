@@ -90,7 +90,7 @@ export default function EmbarqueDetalhesDialog({ embarque, open, onOpenChange, o
           <div className="flex items-center justify-between gap-4 pr-6">
             <div>
               <DialogTitle className="text-xl">Embarque {embarque.numeroEmbarque}</DialogTitle>
-              <DialogDescription>Placa: {embarque.placaVeiculo || '-'}</DialogDescription>
+              <DialogDescription>{embarque.pedido} • {embarque.destinatario} • Placa: {embarque.placaVeiculo || '-'}</DialogDescription>
             </div>
             {getStatusBadge(embarque.status)}
           </div>
@@ -105,6 +105,16 @@ export default function EmbarqueDetalhesDialog({ embarque, open, onOpenChange, o
         </DialogHeader>
 
         <ScrollArea className="flex-1 min-h-0 px-6 py-4">
+          {/* Dados da expedição */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm mb-4 p-3 rounded-lg border bg-card">
+            <div><span className="text-muted-foreground text-xs">Pedido</span><p className="font-medium">{embarque.pedido || '-'}</p></div>
+            <div><span className="text-muted-foreground text-xs">Destinatário</span><p className="font-medium">{embarque.destinatario || '-'}</p></div>
+            <div><span className="text-muted-foreground text-xs">Destino</span><p className="font-medium">{embarque.cidadeDestino || '-'} / {embarque.ufDestino || '-'}</p></div>
+            <div><span className="text-muted-foreground text-xs">Veículo</span><p className="font-medium">{embarque.tipoVeiculo || '-'} • {embarque.placaVeiculo || '-'}</p></div>
+            <div><span className="text-muted-foreground text-xs">Motorista</span><p className="font-medium">{embarque.motorista || '-'}</p></div>
+            <div><span className="text-muted-foreground text-xs">Doca</span><p className="font-medium">{embarque.doca || '-'}</p></div>
+          </div>
+
           {/* Resumo */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm mb-4 p-3 rounded-lg bg-muted/30">
             <div>

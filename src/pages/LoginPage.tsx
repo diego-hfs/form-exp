@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import logoNitro from '@/assets/logo-nitro.png';
+import BrandLogo from '@/components/BrandLogo';
 import { LogOut } from 'lucide-react';
 
 export default function LoginPage() {
@@ -45,7 +45,7 @@ export default function LoginPage() {
               </Button>
             </div>
             <div className="mx-auto">
-              <img src={logoNitro} alt="Nitro" className="h-44 object-contain mx-auto" />
+              <BrandLogo />
             </div>
             <CardTitle className="text-xl font-bold">Perfil não configurado</CardTitle>
             <p className="text-muted-foreground text-sm">

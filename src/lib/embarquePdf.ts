@@ -42,6 +42,24 @@ export function gerarEmbarquePdf(embarque: Conferencia, action: 'download' | 'pr
   doc.setTextColor(0);
   cursorY += 6;
 
+  autoTable(doc, {
+    startY: cursorY,
+    head: [['Pedido', 'Destinatário', 'Destino', 'Veículo', 'Motorista', 'Doca']],
+    body: [[
+      embarque.pedido || '-',
+      embarque.destinatario || '-',
+      `${embarque.cidadeDestino || '-'} / ${embarque.ufDestino || '-'}`,
+      `${embarque.tipoVeiculo || '-'} • ${embarque.placaVeiculo || '-'}`,
+      embarque.motorista || '-',
+      embarque.doca || '-',
+    ]],
+    theme: 'grid',
+    headStyles: { fillColor: [241, 245, 249], textColor: 30 },
+    styles: { fontSize: 8, cellPadding: 2 },
+    margin: { left: marginX, right: marginX },
+  });
+  cursorY = (doc as any).lastAutoTable.finalY + 6;
+
   // Resumo de etapas
   autoTable(doc, {
     startY: cursorY,
